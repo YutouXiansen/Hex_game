@@ -3,34 +3,142 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
-#include <MCT.h>
+#include <math.h>
+#include "gittest.h"
 using namespace std;
 
-MCTNode::MCTNode(MCTNode* parent, int parent_board[11][11])
+
+
+
+
+
+
+MCTNode::MCTNode(MCTNode* parent,int x,int y)
 {
 	this->parent = parent;
 	this->score = 0;
 	this->search_time = 0;
-	for (int i = 0; i < 11; i++)				//½«¸¸½ÚµãÆåÅÌ¸³Öµ¸ø×Ó½ÚµãÆåÅÌ£¬¸ù¾İ¾ßÌåÇé¿öÌí¼ÓÆå×Ó
-	{
-		for (int j = 0; j < 11; j++)
-		{
-			this->Current_board[i][j] = parent_board[i][j];
+	this->x=x,this->y=y;
+}
+
+double MCTNode::UCT()
+{
+	return 1.414 * sqrt(log(this->children_search_time) / this->search_time+0.0001) + 1.0 * this->win_time / this->search_time+0.01;
+}
+
+MCTNode* MCTNode:: expand(MCTNode* node) {
+	//åŒè·ç¦»é€‰ç‚¹
+	struct xgznode** better_choice;
+	MCTNode* new_node;
+	for(int k=0;k<6;k++){
+
+	new_node = new MCTNode(node,better_choice[k]->i,better_choice[k]->j);
+	node->child.emplace_back(new_node);
+	}
+	return new_node;
+}
+
+MCTNode* MCTNode::select(MCTNode* node)
+{
+		coulor=1;
+		while (!node->isTerminal()) {
+			if (node->isAllExpand()) {
+				node = node->bestChild(node, true);
+			} else {
+				node = node->expand(node);
+//				return sub_node;
+			}
+			
+			//è¡¥å……æ£‹ç›˜
+			Current_board[node->x][node->y]=1;
+			coulor=-coulor;
 		}
+		
+	
+		
+		
+		return node;
+
+}
+//è¾¾åˆ°å±‚æ•°åéšæœºè½ç‚¹
+int MCTNode::simulate(){
+	int x,y,wins=0;
+	//é€šè¿‡ç¬¬ä¸€é¢—å­åˆ¤æ–­è°å…ˆæ‰‹
+	if( Current_board[1][2] == 1){//æˆ‘æ–¹å…ˆæ‰‹
+		coulor=1;
+	}
+	x = rand() % (11) ;
+	y = rand() % (11) ;
+	for(int i=0;i<=0;i++){           //æœªæ·»åŠ æ¬¡æ•°
+		
+		while(Current_board[x][y]!=0){
+			x = rand() % (11) ;
+			y = rand() % (11) ;
+		}
+		Current_board[x][y]=coulor;
+		coulor=-coulor;
+	}
+	//åˆ¤æ–­è¾“èµ¢ï¼Ÿ
+//	is_win();
+	
+//	memcpy(Current_board,board,121*sizeof(int));
+    return wins;
+}
+
+void MCTNode::backup(MCTNode* node, double reward) {
+	while (node != nullptr) {
+		node->search_time++;
+		node->score+=reward;
+		node = node->parent;
 	}
 }
-
-int MCTNode::UCT()
-{
-	return 1.414 * sqrt(log(this->children_search_time) / this->search_time) + 1.0 * this->win_time / this->search_time;
-}
-
-MCTNode* MCTNode::select()
-{
-
-}
-
 int MCTNode::is_win()
 {
 	return 1;
+}
+
+
+MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
+	
+	
+}	
+//MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
+//	double best_score = -std::numeric_limits<double>::max();
+//	Node* best_sub_node = nullptr;
+//	
+//	for (Node* sub_node : node->getChildren()) {
+//		double C;
+//		if (is_exploration) {
+//			C = 1 / std::sqrt(2.0);
+//		} else {
+//			C = 0.0;
+//		}
+//		
+//		double left = sub_node->getQualityValue() / sub_node->getVisitTimes();
+//		double right = 2.0 * std::log(node->getVisitTimes()) / sub_node->getVisitTimes();
+//		double score = left + C * std::sqrt(right);
+//		
+//		if (score > best_score) {
+//			best_sub_node = sub_node;
+//			best_score = score;
+//		}
+//	}
+//	
+//	return best_sub_node;
+//}
+
+
+MCTNode* MCTNode:: monteCarloTreeSearch(int x,int y,int board[11][11]) {
+	memcpy(Current_board,board,121*sizeof(int));
+	MCTNode* root = new MCTNode(nullptr,x,y);
+	
+	
+	MCTNode* expand_node = root->select(root);
+	expand_node->win_time+=expand_node->simulate();
+	double reward = UCT(expand_node);
+	backup(expand_node, reward);
+	
+	
+	Node* best_next_node = bestChild(node, false);
+	return best_next_node;
 }

@@ -225,7 +225,7 @@ MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration)
 //	return best_sub_node;
 //}
 //谁先下
-int who_first(int board[11][11]){
+int who_first(int board[15][15]){
 	if(board[1][2]==-1){
 		return 0;//对面先下
 	}

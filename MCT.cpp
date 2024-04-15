@@ -224,7 +224,15 @@ MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration)
 //	
 //	return best_sub_node;
 //}
-
+//谁先下
+int who_first(int board[11][11]){
+	if(board[1][2]==-1){
+		return 0;//对面先下
+	}
+	else{
+		return 1;//我们先下
+	}
+}
 
 MCTNode* MCTNode::monteCarloTreeSearch(int x, int y, int board[11][11]) {
 	memcpy(Current_board, board, 121 * sizeof(int));

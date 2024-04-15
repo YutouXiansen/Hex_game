@@ -7,7 +7,7 @@
 using namespace std;
 int Current_board[11][11]={0};			//当前棋局
 int coulor,round0;                             
-int who_first(int board[11][11]);			//谁先手,先下返回1,后下返回0
+int who_first(int board[15][15]);			//谁先手,先下返回1,后下返回0
 
 
 

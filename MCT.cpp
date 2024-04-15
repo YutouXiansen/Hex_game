@@ -25,7 +25,7 @@ MCTNode::MCTNode(MCTNode* parent, int x, int y)
 
 double MCTNode::UCT()
 {
-	return 1.414 * sqrt(log(this->children_search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
+	return 1.414 * sqrt(log(this->parent->children_search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
 }
 
 MCTNode* MCTNode::expand(MCTNode* node) {
@@ -105,12 +105,12 @@ int MCTNode::is_win()				//我方赢了返回1
 	{
 		for (int i = 0; i < 11; i++)
 		{
-			if (Current_board[i][0] == 1)			//进入搜索程序
+			if (Current_board[0][i] == 1)			//进入搜索程序
 			{
-				if (Current_board[i + 1][0] == 1)
+				if (Current_board[0][i + 1] == 1)
 				{
-					visited[i + 1][0] = 1;
-					if (search_first(i + 1, 0, 1))
+					visited[0][i + 1] = 1;
+					if (search_first(0, i + 1, 1))
 						return 1;
 				}
 			}
@@ -125,12 +125,12 @@ int MCTNode::is_win()				//我方赢了返回1
 	{
 		for (int i = 0; i < 11; i++)
 		{
-			if (Current_board[i][0] == -1)			//进入搜索程序
+			if (Current_board[0][i] == -1)			//进入搜索程序
 			{
-				if (Current_board[i + 1][0] == -1)
+				if (Current_board[0][i + 1] == -1)
 				{
-					visited[i + 1][0] = 1;
-					if (search_first(i + 1, 0, -1))
+					visited[0][i + 1] = 1;
+					if (search_first(0, i + 1, -1))
 						return 0;				//我军败了
 				}
 			}
@@ -145,6 +145,8 @@ int MCTNode::is_win()				//我方赢了返回1
 
 int MCTNode::search_first(int x, int y, int colour)
 {
+	if (x == 10)
+		return 1;
 	if (x - 1 >= 0 && y >= 0 && Current_board[x - 1][y] == colour && visited[x - 1][y] == 0)
 	{
 		visited[x - 1][y] = 1;
@@ -157,10 +159,10 @@ int MCTNode::search_first(int x, int y, int colour)
 		if (search_first(x + 1, y, colour))
 			return 1;
 	}
-	if (x - 1 >= 0 && y - 1 >= 0 && Current_board[x - 1][y - 1] == colour && visited[x - 1][y - 1] == 0)
+	if (x - 1 >= 0 && y + 1 >= 0 && Current_board[x - 1][y + 1] == colour && visited[x - 1][y + 1] == 0)
 	{
-		visited[x - 1][y - 1] = 1;
-		if (search_first(x - 1, y - 1, colour))
+		visited[x - 1][y + 1] = 1;
+		if (search_first(x - 1, y + 1, colour))
 			return 1;
 	}
 	if (x >= 0 && y + 1 >= 0 && Current_board[x][y + 1] == colour && visited[x][y + 1] == 0)

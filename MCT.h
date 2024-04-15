@@ -49,6 +49,8 @@ public:
 	int simulate();
 	//判断输赢函数
 	int is_win();
+	//遍历查找先手一方通路
+	int search_first(int x, int y, int colour);
 	//反向传播算分函数
 	void backup(MCTNode* node, double reward);
 	//UCT函数

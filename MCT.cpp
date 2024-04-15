@@ -184,9 +184,19 @@ int MCTNode::search_first(int x, int y, int colour)
 	return 0;
 }
 
-MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
-
-
+MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) 
+{
+	int UCT_number = 0;
+	MCTNode* best = NULL;
+	vector<MCTNode*>::iterator p = node->child.begin();
+	for (p; p != node->child.end(); p++)
+	{
+		if ((*p)->search_time == 0)
+			return (*p);
+		else if (UCT_number < (*p)->UCT())
+			best = (*p);
+	}
+	return best;
 }
 //MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
 //	double best_score = -std::numeric_limits<double>::max();

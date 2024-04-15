@@ -63,4 +63,6 @@ public:
 	MCTNode* bestChild(MCTNode* node, bool is_exploration);
 	//全过程
 	MCTNode* monteCarloTreeSearch(int x,int y,int board[11][11]); 
+	//填充特殊结构的函数
+	void fill_board();
 };

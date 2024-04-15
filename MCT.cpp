@@ -4,8 +4,10 @@
 #include <ctime>
 #include <cstdlib>
 #include <math.h>
-#include "gittest.h"
+#include <MCT.h>
 using namespace std;
+extern int Current_board[11][11];
+int visited[11][11] = { 0 };			//用作判断结束时是否已遍历该点的标识
 
 
 
@@ -13,95 +15,179 @@ using namespace std;
 
 
 
-MCTNode::MCTNode(MCTNode* parent,int x,int y)
+MCTNode::MCTNode(MCTNode* parent, int x, int y)
 {
 	this->parent = parent;
 	this->score = 0;
 	this->search_time = 0;
-	this->x=x,this->y=y;
+	this->x = x, this->y = y;
 }
 
 double MCTNode::UCT()
 {
-	return 1.414 * sqrt(log(this->children_search_time) / this->search_time+0.0001) + 1.0 * this->win_time / this->search_time+0.01;
+	return 1.414 * sqrt(log(this->children_search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
 }
 
-MCTNode* MCTNode:: expand(MCTNode* node) {
+MCTNode* MCTNode::expand(MCTNode* node) {
 	//双距离选点
 	struct xgznode** better_choice;
 	MCTNode* new_node;
-	for(int k=0;k<6;k++){
+	for (int k = 0; k < 6; k++) {
 
-	new_node = new MCTNode(node,better_choice[k]->i,better_choice[k]->j);
-	node->child.emplace_back(new_node);
+		new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
+		node->child.emplace_back(new_node);
 	}
 	return new_node;
 }
 
 MCTNode* MCTNode::select(MCTNode* node)
 {
-		coulor=1;
-		while (!node->isTerminal()) {
-			if (node->isAllExpand()) {
-				node = node->bestChild(node, true);
-			} else {
-				node = node->expand(node);
-//				return sub_node;
-			}
-			
-			//补充棋盘
-			Current_board[node->x][node->y]=1;
-			coulor=-coulor;
+	color = 1;
+	while (!node->isTerminal()) {
+		if (node->isAllExpand()) {
+			node = node->bestChild(node, true);
 		}
-		
-	
-		
-		
-		return node;
+		else {
+			node = node->expand(node);
+			//				return sub_node;
+		}
+
+		//补充棋盘
+		Current_board[node->x][node->y] = 1;
+		color = -color;
+	}
+
+
+
+
+	return node;
 
 }
 //达到层数后随机落点
-int MCTNode::simulate(){
-	int x,y,wins=0;
+int MCTNode::simulate() {
+	int x, y, wins = 0;
 	//通过第一颗子判断谁先手
-	if( Current_board[1][2] == 1){//我方先手
-		coulor=1;
+	if (Current_board[1][2] == 1) {//我方先手
+		color = 1;
 	}
-	x = rand() % (11) ;
-	y = rand() % (11) ;
-	for(int i=0;i<=0;i++){           //未添加次数
-		
-		while(Current_board[x][y]!=0){
-			x = rand() % (11) ;
-			y = rand() % (11) ;
+	x = rand() % (11);
+	y = rand() % (11);
+	for (int i = 0; i <= 0; i++) {           //未添加次数
+
+		while (Current_board[x][y] != 0) {
+			x = rand() % (11);
+			y = rand() % (11);
 		}
-		Current_board[x][y]=coulor;
-		coulor=-coulor;
+		Current_board[x][y] = color;
+		color = -color;
 	}
 	//判断输赢？
 //	is_win();
-	
+
 //	memcpy(Current_board,board,121*sizeof(int));
-    return wins;
+	return wins;
 }
 
 void MCTNode::backup(MCTNode* node, double reward) {
 	while (node != nullptr) {
 		node->search_time++;
-		node->score+=reward;
+		node->score += reward;
 		node = node->parent;
 	}
 }
-int MCTNode::is_win()
+int MCTNode::is_win()				//我方赢了返回1
 {
-	return 1;
+	int win_flag = 0;
+	//board
+	//先判断我方先手后手
+	//先判断红方先手，上下贯通
+	if(Current_board[1][2] == 1)			//我方先手
+	{
+		for (int i = 0; i < 11; i++)
+		{
+			if (Current_board[i][0] == 1)			//进入搜索程序
+			{
+				if (Current_board[i + 1][0] == 1)
+				{
+					visited[i + 1][0] = 1;
+					if (search_first(i + 1, 0, 1))
+						return 1;
+				}
+			}
+		}
+		for (int i = 0; i < 11; i++)					//这个在退出函数时再运行一次
+		{
+			for (int j = 0; j < 11; j++)
+				visited[i][j] = 0;
+		}
+	}
+	else if (Current_board[1][2] == -1)				//我方后手
+	{
+		for (int i = 0; i < 11; i++)
+		{
+			if (Current_board[i][0] == -1)			//进入搜索程序
+			{
+				if (Current_board[i + 1][0] == -1)
+				{
+					visited[i + 1][0] = 1;
+					if (search_first(i + 1, 0, -1))
+						return 0;				//我军败了
+				}
+			}
+		}
+		for (int i = 0; i < 11; i++)
+		{
+			for (int j = 0; j < 11; j++)
+				visited[i][j] = 0;
+		}
+	}
 }
 
+int MCTNode::search_first(int x, int y, int colour)
+{
+	if (x - 1 >= 0 && y >= 0 && Current_board[x - 1][y] == colour && visited[x - 1][y] == 0)
+	{
+		visited[x - 1][y] = 1;
+		if (search_first(x - 1, y, colour))
+			return 1;
+	}
+	if (x + 1 >= 0 && y >= 0 && Current_board[x + 1][y] == colour && visited[x + 1][y] == 0)
+	{
+		visited[x + 1][y] = 1;
+		if (search_first(x + 1, y, colour))
+			return 1;
+	}
+	if (x - 1 >= 0 && y - 1 >= 0 && Current_board[x - 1][y - 1] == colour && visited[x - 1][y - 1] == 0)
+	{
+		visited[x - 1][y - 1] = 1;
+		if (search_first(x - 1, y - 1, colour))
+			return 1;
+	}
+	if (x >= 0 && y + 1 >= 0 && Current_board[x][y + 1] == colour && visited[x][y + 1] == 0)
+	{
+		visited[x][y + 1] = 1;
+		if (search_first(x, y + 1, colour))
+			return 1;
+	}
+	if (x + 1 >= 0 && y - 1 >= 0 && Current_board[x + 1][y - 1] == colour && visited[x + 1][y - 1] == 0)
+	{
+		visited[x + 1][y - 1] = 1;
+		if (search_first(x + 1, y - 1, colour))
+			return 1;
+	}
+	if (x >= 0 && y - 1 >= 0 && Current_board[x][y - 1] == colour && visited[x][y - 1] == 0)
+	{
+		visited[x][y - 1] = 1;
+		if (search_first(x, y - 1, colour))
+			return 1;
+	}
+	return 0;
+}
 
 MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
-	
-	
-}	
+
+
+}
 //MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
 //	double best_score = -std::numeric_limits<double>::max();
 //	Node* best_sub_node = nullptr;
@@ -128,17 +214,17 @@ MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) {
 //}
 
 
-MCTNode* MCTNode:: monteCarloTreeSearch(int x,int y,int board[11][11]) {
-	memcpy(Current_board,board,121*sizeof(int));
-	MCTNode* root = new MCTNode(nullptr,x,y);
-	
-	
+MCTNode* MCTNode::monteCarloTreeSearch(int x, int y, int board[11][11]) {
+	memcpy(Current_board, board, 121 * sizeof(int));
+	MCTNode* root = new MCTNode(nullptr, x, y);
+
+
 	MCTNode* expand_node = root->select(root);
-	expand_node->win_time+=expand_node->simulate();
-	double reward = UCT(expand_node);
+	expand_node->win_time += expand_node->simulate();
+	double reward = UCT();
 	backup(expand_node, reward);
-	
-	
+
+
 	Node* best_next_node = bestChild(node, false);
 	return best_next_node;
 }

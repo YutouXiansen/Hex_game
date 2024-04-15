@@ -248,3 +248,133 @@ MCTNode* MCTNode::monteCarloTreeSearch(int x, int y, int board[11][11]) {
 	Node* best_next_node = bestChild(node, false);
 	return best_next_node;
 }
+
+void MCTNode::fill_board()
+{
+	if(Current_board[1][2] == 1)				//我方先手,从x=0链接到x=10
+	{
+		for (int i = 0; i < 11; i++)
+		{
+			for (int j = 0; j < 11; j++)
+			{
+				//判断金字塔
+				if (i == 1 && Current_board[i][j] == 1)			//高为2的金字塔
+				{
+					if (Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 0)			//金字塔无破坏
+					{
+						//随机落点
+					}
+				}
+				else if (j == 1 && Current_board[i][j] == -1)
+				{
+					if (Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+					{
+						//随机落点
+					}
+				}
+				else if (i == 2 && Current_board[i][j] == 1)			//高为3的金字塔，两侧
+				{
+					if (Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 1][j + 2] == 0 && Current_board[i - 2][j + 2] == 0 && Current_board[i - 2][j + 3] == 0)
+					{
+						//随机落点
+					}
+					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 2][j - 1] == 0 && Current_board[i][j] == 0 && Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 2][j + 2] == 0)
+					{
+						//随机落点
+					}
+				}
+				else if (j == 2 && Current_board[i][j] == -1)
+				{
+					if (Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 1] == 0 && Current_board[i + 2][j - 2] == 0 && Current_board[i + 3][j - 2] == 0)
+					{
+						//随机落点
+					}
+					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 1][j - 2] == 0 && Current_board[i][j] == 0 && Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 2] == 0)
+					{
+						//随机落点
+					}
+				}
+				//我方四个桥
+				if (Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+				{
+					//随机落点
+				}
+				//对方四个桥
+				if (Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				{
+					//随机落点
+				}
+				if (Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+				{
+					//随机落点
+				}
+			}
+		}
+	}
+	else						//对方先手
+	{
+		for (int i = 0; i < 11; i++)
+		{
+			for (int j = 0; j < 11; j++)
+			{
+				//判断金字塔
+				if (i == 1 && Current_board[i][j] == -1)			//高为2的金字塔
+				{
+					if (Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 0)			//金字塔无破坏
+					{
+						//随机落点
+					}
+				}
+				else if (j == 1 && Current_board[i][j] == 1)
+				{
+					if (Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+					{
+						//随机落点
+					}
+				}
+				else if (i == 2 && Current_board[i][j] == -1)			//高为3的金字塔，两侧
+				{
+					if (Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 1][j + 2] == 0 && Current_board[i - 2][j + 2] == 0 && Current_board[i - 2][j + 3] == 0)
+					{
+						//随机落点
+					}
+					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 2][j - 1] == 0 && Current_board[i][j] == 0 && Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 2][j + 2] == 0)
+					{
+						//随机落点
+					}
+				}
+				else if (j == 2 && Current_board[i][j] == 1)
+				{
+					if (Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 1] == 0 && Current_board[i + 2][j - 2] == 0 && Current_board[i + 3][j - 2] == 0)
+					{
+						//随机落点
+					}
+					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 1][j - 2] == 0 && Current_board[i][j] == 0 && Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 2] == 0)
+					{
+						//随机落点
+					}
+				}
+			}
+		}
+	}
+}

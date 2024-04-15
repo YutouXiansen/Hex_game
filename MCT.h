@@ -5,29 +5,60 @@
 #include <cstdlib>
 #include <vector>
 using namespace std;
+int Current_board[11][11]={0};			//å½“å‰æ£‹å±€
+int coulor,round0;                             //è°å…ˆæ‰‹
+
+
+
+
+
+
+
+
+struct xgznode
+{
+	int i;
+	int j;
+	int distance;
+};
+
+
+
+
+
+
+
 
 class MCTNode
 {
 private:
-	int Current_board[11][11];			//µ±Ç°Æå¾Ö
-	vector<MCTNode*> child;			//×Ó½Úµã¼¯ºÏ
-	MCTNode* parent;			//¸¸½Úµã£¬¼Ó¼õ·ÖÓÃ
-	int score;				//·ÖÊı
-	int search_time;			//ËÑË÷´ÎÊı
-	int win_time;			//Ê¤Àû´ÎÊı
-	int children_search_time;			//ËùÓĞ×Ó½ÚµãËÑË÷´ÎÊı
+	int x,y;
+	vector<MCTNode*> child;			//å­èŠ‚ç‚¹é›†åˆ
+	MCTNode* parent;			//çˆ¶èŠ‚ç‚¹ï¼ŒåŠ å‡åˆ†ç”¨
+	int score;				//åˆ†æ•°
+	int search_time;			//æœç´¢æ¬¡æ•°
+	int win_time;			//èƒœåˆ©æ¬¡æ•°
+	int children_search_time;			//æ‰€æœ‰å­èŠ‚ç‚¹æœç´¢æ¬¡æ•°
 public:
-	MCTNode(MCTNode* parent, int parent_board[11][11]);
-	//Ñ¡Ôñ×Ó½Úµã£¬·µ»ØÖµÎªMCTNode*ÀàĞÍ
-	MCTNode* select();
-	//ÍØÕ¹¸Ã½Úµã£¬·µ»ØÖµÎª¿Õ
-	void expend();
-	//Ä£Äâ£¬·µ»ØÖµÎªintÀàĞÍ£¬ÅĞ¶ÏÊäÓ®
+	MCTNode(MCTNode* parent,int x,int y);
+	//é€‰æ‹©å­èŠ‚ç‚¹ï¼Œè¿”å›å€¼ä¸ºMCTNode*ç±»å‹
+	MCTNode* select(MCTNode* node);
+	//æ‹“å±•è¯¥èŠ‚ç‚¹ï¼Œè¿”å›å€¼ä¸ºç©º
+	MCTNode* expand(MCTNode* node);
+	//æ¨¡æ‹Ÿï¼Œè¿”å›å€¼ä¸ºintç±»å‹ï¼Œåˆ¤æ–­è¾“èµ¢
 	int simulate();
-	//ÅĞ¶ÏÊäÓ®º¯Êı
+	//åˆ¤æ–­è¾“èµ¢å‡½æ•°
 	int is_win();
-	//·´Ïò´«²¥Ëã·Öº¯Êı
-	int back();
-	//UCTº¯Êı
-	int UCT();
+	//åå‘ä¼ æ’­ç®—åˆ†å‡½æ•°
+	void backup(MCTNode* node, double reward);
+	//UCTå‡½æ•°
+	double UCT();
+	//åˆ¤æ–­ç»“æŸ
+	int isTerminal();
+	//åˆ¤æ–­æ¢ç´¢å®Œæˆ
+	int isAllExpand();
+	//é€‰æ‹©æœ€å¥½å­èŠ‚ç‚¹
+	MCTNode* bestChild(MCTNode* node, bool is_exploration);
+	//å…¨è¿‡ç¨‹
+	MCTNode* monteCarloTreeSearch(int x,int y,int board[11][11]); 
 };

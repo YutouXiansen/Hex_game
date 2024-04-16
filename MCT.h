@@ -10,7 +10,12 @@ int coulor,round0;
 int who_first(int board[15][15]);			//谁先手,先下返回1,后下返回0
 
 
-
+struct Union_node
+{
+	int father_x;
+	int father_y;
+};
+struct Union_node Current_union[11][11];			//并查集
 
 
 
@@ -49,8 +54,12 @@ public:
 	int simulate();
 	//判断输赢函数
 	int is_win();
-	//遍历查找先手一方通路
-	int search_first(int x, int y, int colour);
+	//并查集初始化
+	void union_find(int color);
+	//落点时并查集的更新
+	void union_find_update(int x, int y, int color);
+	//找父节点函数
+	Union_node* union_find_father(int x, int y);
 	//反向传播算分函数
 	void backup(MCTNode* node, double reward);
 	//UCT函数

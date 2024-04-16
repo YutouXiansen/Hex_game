@@ -11,7 +11,8 @@ using namespace std;
 
 const int SIZE1 = 15;
 const int RealSIZE = 13;
-int board1[RealSIZE][RealSIZE] = { 0 };//±¾·½1£¬¶Ô·½-1£¬¿Õ°×0  // [A][1]
+const int need = 6;
+//int board1[RealSIZE][RealSIZE] = { 0 };//æœ¬æ–¹1ï¼Œå¯¹æ–¹-1ï¼Œç©ºç™½0  // [A][1]
 
 struct xgznode
 {
@@ -40,11 +41,12 @@ int** mybule_twodis_bule_to_A10(int** board1);
 int** mybule_twodis_red_to_A0(int** board1);
 int** mybule_twodis_red_to_A10(int** board1);
 int findseconddis(int i, int j,int flag,int** dis);      //flag = 1  ---> count 1
-void make_real(int** board);
+void make_real(int** board,int** board1);
 void redsort(int** dis_red);
 void bulesort(int** dis_bule);
 int** myred_toget_twodis_red(int** board1);
 int** myred_toget_twodis_bule(int** board1);
 int** mybule_toget_twodis_bule(int** board1);
 int** mybule_toget_twodis_red(int** board1);
-int getpot();
+//int getpot();
+xgznode** toget_twodis(int** board, int mycolor , int color);

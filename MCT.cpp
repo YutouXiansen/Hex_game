@@ -7,6 +7,8 @@
 #include <MCT.h>
 using namespace std;
 extern int Current_board[11][11];
+extern int Current_board[11][11];
+extern struct Union_node Current_union[11][11];
 int visited[11][11] = { 0 };			//用作判断结束时是否已遍历该点的标识
 
 
@@ -95,97 +97,809 @@ void MCTNode::backup(MCTNode* node, double reward) {
 		node = node->parent;
 	}
 }
-int MCTNode::is_win()				//我方赢了返回1
+int MCTNode::is_win()				//我方赢了返回1，对方赢了返回-1，未结束返回0
 {
-	int win_flag = 0;
-	//board
-	//先判断我方先手后手
-	//先判断红方先手，上下贯通
-	if(Current_board[1][2] == 1)			//我方先手
+	if (Current_board[1][2] == 1)			//我方先手
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			if (Current_union[10][j].father_x = 0)
+				return 1;
+		}
+		for (int i = 0; i < 11; i++)
+		{
+			if (Current_union[i][10].father_y = 0)
+				return -1;
+		}
+		return 0;
+	}
+	else if (Current_board[1][2] == -1)			//对方先手
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			if (Current_union[10][j].father_x = 0)
+				return -1;
+		}
+		for (int i = 0; i < 11; i++)
+		{
+			if (Current_union[i][10].father_y = 0)
+				return 1;
+		}
+		return 0;
+	}
+}
+
+void MCTNode::union_find(int color)			//棋盘并查集初始化
+{
+	if(Current_board[1][2] == 1)			//我方先手，从i/x == 0到 i/x == 10
 	{
 		for (int i = 0; i < 11; i++)
 		{
-			if (Current_board[0][i] == 1)			//进入搜索程序
+			for (int j = 0; j < 11; j++)
 			{
-				if (Current_board[0][i + 1] == 1)
+				if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
 				{
-					visited[0][i + 1] = 1;
-					if (search_first(0, i + 1, 1))
-						return 1;
+					Current_union[i][j].father_x = i;
+					Current_union[i][j].father_y = j;
 				}
 			}
 		}
-		for (int i = 0; i < 11; i++)					//这个在退出函数时再运行一次
+		for (int i = 0; i < 11; i++)
 		{
 			for (int j = 0; j < 11; j++)
-				visited[i][j] = 0;
+			{
+				if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+				{
+					;
+				}
+				else if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+				{
+					if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+						{
+							union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+						}
+					}
+					if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+						{
+							union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+						}
+					}
+					if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+						{
+							union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+						}
+					}
+					if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+						{
+							union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+						}
+					}
+					if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+						{
+							union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+						}
+					}
+					if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+						{
+							union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+						}
+					}
+				}
+			}
+			for (int j = 0; j < 11; j++)
+			{
+				for (int i = 0; i < 11; i++)
+				{
+					if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+					{
+						;
+					}
+					else if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+					{
+						if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+							{
+								union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+							}
+						}
+						if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+							{
+								union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+							}
+						}
+						if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+							{
+								union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+							}
+						}
+						if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+							{
+								union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+							}
+						}
+						if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+							{
+								union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+							}
+						}
+						if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+							{
+								union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
-	else if (Current_board[1][2] == -1)				//我方后手
+	else if (Current_board[1][2] == -1)			//对方先手
 	{
 		for (int i = 0; i < 11; i++)
 		{
-			if (Current_board[0][i] == -1)			//进入搜索程序
+			for (int j = 0; j < 11; j++)
 			{
-				if (Current_board[0][i + 1] == -1)
+				if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
 				{
-					visited[0][i + 1] = 1;
-					if (search_first(0, i + 1, -1))
-						return 0;				//我军败了
+					Current_union[i][j].father_x = i;
+					Current_union[i][j].father_y = j;
 				}
 			}
 		}
 		for (int i = 0; i < 11; i++)
 		{
 			for (int j = 0; j < 11; j++)
-				visited[i][j] = 0;
+			{
+				if (i == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+				{
+					;
+				}
+				else if (Current_board[i][j] == -1)			//对对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+				{
+					if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+						{
+							union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+						}
+					}
+					if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+						{
+							union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+						}
+					}
+					if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+						{
+							union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+						}
+					}
+					if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+						{
+							union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+						}
+					}
+					if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+						{
+							union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+						}
+					}
+					if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+					{
+						if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+						{
+							union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+							union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+						}
+						else
+						{
+							union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+							union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+						}
+					}
+				}
+			}
+			for (int j = 0; j < 11; j++)
+			{
+				for (int i = 0; i < 11; i++)
+				{
+					if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+					{
+						;
+					}
+					else if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+					{
+						if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+							{
+								union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+							}
+						}
+						if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+							{
+								union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+							}
+						}
+						if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+							{
+								union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+							}
+						}
+						if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+							{
+								union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+							}
+						}
+						if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+							{
+								union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+							}
+						}
+						if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+						{
+							if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+							{
+								union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+								union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+							}
+							else
+							{
+								union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+								union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
 
-int MCTNode::search_first(int x, int y, int colour)
+void MCTNode::union_find_update(int i, int j, int color)			//落点时并查集更新
 {
-	if (x == 10)
-		return 1;
-	if (x - 1 >= 0 && y >= 0 && Current_board[x - 1][y] == colour && visited[x - 1][y] == 0)
+	if (Current_board[1][2] == 1)			//我方先手
 	{
-		visited[x - 1][y] = 1;
-		if (search_first(x - 1, y, colour))
-			return 1;
+		if(color == 1)			//我方落子
+		{
+			if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+			{
+				;
+			}
+			else if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			{
+				if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+					{
+						union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					}
+				}
+				if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+					{
+						union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					}
+				}
+				if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+					{
+						union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					}
+				}
+				if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+					{
+						union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+					{
+						union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+					{
+						union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					}
+				}
+			}
+		}
+		if (color == -1)			//对方落子
+		{
+			if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+			{
+				;
+			}
+			else if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			{
+				if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+					{
+						union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					}
+				}
+				if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+					{
+						union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					}
+				}
+				if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+					{
+						union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					}
+				}
+				if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+					{
+						union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+					{
+						union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+					{
+						union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					}
+				}
+			}
+		}
 	}
-	if (x + 1 >= 0 && y >= 0 && Current_board[x + 1][y] == colour && visited[x + 1][y] == 0)
+	else if (Current_board[1][2] == -1)			//对方先手
 	{
-		visited[x + 1][y] = 1;
-		if (search_first(x + 1, y, colour))
-			return 1;
+		if (color == -1)			//对方落子
+		{
+			if (i == 0 && Current_board[i][j] == -1)				//对方，且第一排元素，父节点就是自己
+			{
+				;
+			}
+			else if (Current_board[i][j] == -1)			//对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			{
+				if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+					{
+						union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					}
+				}
+				if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+					{
+						union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					}
+				}
+				if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+					{
+						union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					}
+				}
+				if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+					{
+						union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+					{
+						union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+				{
+					if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+					{
+						union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					}
+				}
+			}
+		}
+		if (color == 1)			//我方落子
+		{
+			if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+			{
+				;
+			}
+			else if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			{
+				if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+					{
+						union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					}
+				}
+				if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+					{
+						union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					}
+				}
+				if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+					{
+						union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					}
+				}
+				if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+					{
+						union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+					{
+						union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					}
+				}
+				if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+				{
+					if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+					{
+						union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					}
+					else
+					{
+						union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					}
+				}
+			}
+		}
 	}
-	if (x - 1 >= 0 && y + 1 >= 0 && Current_board[x - 1][y + 1] == colour && visited[x - 1][y + 1] == 0)
-	{
-		visited[x - 1][y + 1] = 1;
-		if (search_first(x - 1, y + 1, colour))
-			return 1;
-	}
-	if (x >= 0 && y + 1 >= 0 && Current_board[x][y + 1] == colour && visited[x][y + 1] == 0)
-	{
-		visited[x][y + 1] = 1;
-		if (search_first(x, y + 1, colour))
-			return 1;
-	}
-	if (x + 1 >= 0 && y - 1 >= 0 && Current_board[x + 1][y - 1] == colour && visited[x + 1][y - 1] == 0)
-	{
-		visited[x + 1][y - 1] = 1;
-		if (search_first(x + 1, y - 1, colour))
-			return 1;
-	}
-	if (x >= 0 && y - 1 >= 0 && Current_board[x][y - 1] == colour && visited[x][y - 1] == 0)
-	{
-		visited[x][y - 1] = 1;
-		if (search_first(x, y - 1, colour))
-			return 1;
-	}
-	return 0;
 }
 
+Union_node* MCTNode::union_find_father(int x, int y)			//寻找并查集根结点
+{
+	if (Current_union[x][y].father_x == x && Current_union[x][y].father_y == y)				//根结点是自己，直接返回
+		return &Current_union[x][y];
+	else				//根结点不是自己，获取后更新
+	{
+		struct Union_node* final_father;
+		final_father = union_find_father(Current_union[x][y].father_x, Current_union[x][y].father_y);
+		Current_union[x][y].father_x = final_father->father_x;
+		Current_union[x][y].father_y = final_father->father_y;
+		return final_father;
+	}
+}
 MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) 
 {
 	int UCT_number = 0;

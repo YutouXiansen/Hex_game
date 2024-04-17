@@ -926,6 +926,21 @@ Union_node* MCTNode::union_find_father(int x, int y)			//寻找并查集根结�
 		return final_father;
 	}
 }
+
+Union_node* MCTNode::union_find_father_first(int x, int y)			//寻找并查集根结点
+{
+	if (union_board[x][y].father_x == x && union_board[x][y].father_y == y)				//根结点是自己，直接返回
+		return &union_board[x][y];
+	else				//根结点不是自己，获取后更新
+	{
+		struct Union_node* final_father;
+		final_father = union_find_father_first(union_board[x][y].father_x, union_board[x][y].father_y);
+		union_board[x][y].father_x = final_father->father_x;
+		union_board[x][y].father_y = final_father->father_y;
+		return final_father;
+	}
+}
+
 MCTNode* MCTNode::bestChild(MCTNode* node, bool is_exploration) 
 {
 	int UCT_number = 0;

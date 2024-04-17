@@ -5,11 +5,14 @@
 #include <cstdlib>
 #include <math.h>
 #include <MCT.h>
+#include <stack>
 using namespace std;
 extern int Current_board[11][11];
 extern int Current_board[11][11];
 extern struct Union_node Current_union[11][11];
-int visited[11][11] = { 0 };			//用作判断结束时是否已遍历该点的标识
+extern struct Union_node union_board[11][11];
+extern stack<int> useless_nodes_x, useless_node_y;
+int visited[11][11] = { 0 };			//用作排除搜索结构时自己填的点，加快运行速度
 
 
 
@@ -139,8 +142,8 @@ void MCTNode::union_find(int color)			//棋盘并查集初始化
 			{
 				if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
 				{
-					Current_union[i][j].father_x = i;
-					Current_union[i][j].father_y = j;
+					union_board[i][j].father_x = i;
+					union_board[i][j].father_y = j;
 				}
 			}
 		}
@@ -335,8 +338,8 @@ void MCTNode::union_find(int color)			//棋盘并查集初始化
 			{
 				if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
 				{
-					Current_union[i][j].father_x = i;
-					Current_union[i][j].father_y = j;
+					union_board[i][j].father_x = i;
+					union_board[i][j].father_y = j;
 				}
 			}
 		}
@@ -521,6 +524,29 @@ void MCTNode::union_find(int color)			//棋盘并查集初始化
 					}
 				}
 			}
+		}
+	}
+
+	//当前并查集的构建
+
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			Current_union[i][j].father_x = union_board[i][j].father_x;
+			Current_union[i][j].father_y = union_board[i][j].father_y;
+		}
+	}
+}
+
+void MCTNode::union_board_reset()
+{
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			Current_union[i][j].father_x = union_board[i][j].father_x;
+			Current_union[i][j].father_y = union_board[i][j].father_y;
 		}
 	}
 }
@@ -963,132 +989,479 @@ MCTNode* MCTNode::monteCarloTreeSearch(int x, int y, int board[11][11]) {
 	return best_next_node;
 }
 
-void MCTNode::fill_board()
+void MCTNode::fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
 {
-	if(Current_board[1][2] == 1)				//我方先手,从x=0链接到x=10
+	for(int i = 0; i < 11; i++)
 	{
-		for (int i = 0; i < 11; i++)
+		for (int j = 0; j < 11; j++)
 		{
-			for (int j = 0; j < 11; j++)
+			if(visited[i][j] == 0)			//该点不是自己填的
 			{
-				//判断金字塔
-				if (i == 1 && Current_board[i][j] == 1)			//高为2的金字塔
+				//我方六个桥||||||else里是脆弱的桥
+
+
+				if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
 				{
-					if (Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 0)			//金字塔无破坏
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
 					{
-						//随机落点
+						Current_board[i - 1][j] == 1;
+						union_find_update(i - 1, j, 1);
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j] == -1;
+						union_find_update(i - 1, j, -1);
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
 					}
 				}
-				else if (j == 1 && Current_board[i][j] == -1)
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
 				{
-					if (Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
 					{
-						//随机落点
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] == -1;
+						union_find_update(i + 1, j - 1, -1);
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] == 1;
+						union_find_update(i + 1, j - 1, 1);
+						visited[i + 1][j - 1] = 1;
 					}
 				}
-				else if (i == 2 && Current_board[i][j] == 1)			//高为3的金字塔，两侧
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
 				{
-					if (Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 1][j + 2] == 0 && Current_board[i - 2][j + 2] == 0 && Current_board[i - 2][j + 3] == 0)
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
 					{
-						//随机落点
+						Current_board[i + 1][j] == 1;
+						union_find_update(i + 1, j, 1);
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] == -1;
+						union_find_update(i + 1, j - 1, -1);
+						visited[i + 1][j - 1] = 1;
 					}
-					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 2][j - 1] == 0 && Current_board[i][j] == 0 && Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 2][j + 2] == 0)
+					else
 					{
-						//随机落点
+						Current_board[i + 1][j] == -1;
+						union_find_update(i + 1, j, -1);
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] == 1;
+						union_find_update(i + 1, j - 1, 1);
+						visited[i + 1][j - 1] = 1;
 					}
 				}
-				else if (j == 2 && Current_board[i][j] == -1)
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
 				{
-					if (Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 1] == 0 && Current_board[i + 2][j - 2] == 0 && Current_board[i + 3][j - 2] == 0)
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
 					{
-						//随机落点
+						Current_board[i][j + 1] == 1;
+						union_find_update(i, j + 1, 1);
+						visited[i][j + 1] = 1;
+						Current_board[i - 1][j + 1] == -1;
+						union_find_update(i - 1, j + 1, -1);
+						visited[i - 1][j + 1] = 1;
 					}
-					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 1][j - 2] == 0 && Current_board[i][j] == 0 && Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 2] == 0)
+					else
 					{
-						//随机落点
+						Current_board[i][j + 1] == -1;
+						union_find_update(i, j + 1, -1);
+						visited[i + 1][j - 1] = 1;
+						Current_board[i - 1][j + 1] == 1;
+						union_find_update(i - 1, j + 1, 1);
+						visited[i - 1][j + 1] = 1;
 					}
 				}
-				//我方四个桥
-				if (Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] == 1;
+						union_find_update(i, j + 1, 1);
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] == -1;
+						union_find_update(i + 1, j, -1);
+						visited[i + 1][j] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] == -1;
+						union_find_update(i, j + 1, -1);
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] == 1;
+						union_find_update(i + 1, j, 1);
+						visited[i + 1][j] = 1;
+					}
 				}
-				if (Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j + 1] == 1;
+						union_find_update(i - 1, j + 1, 1);
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j + 1] == -1;
+						union_find_update(i - 1, j + 1, -1);
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
+					}
 				}
-				if (Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+
+
+				//对方六个桥
+
+
+				if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j] == 1;
+						union_find_update(i - 1, j, 1);
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j] == -1;
+						union_find_update(i - 1, j, -1);
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
+					}
 				}
-				if (Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] == -1;
+						union_find_update(i + 1, j - 1, -1);
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] == 1;
+						union_find_update(i + 1, j - 1, 1);
+						visited[i + 1][j - 1] = 1;
+					}
 				}
-				//对方四个桥
-				if (Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i + 1][j] == 1;
+						union_find_update(i + 1, j, 1);
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] == -1;
+						union_find_update(i + 1, j - 1, -1);
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i + 1][j] == -1;
+						union_find_update(i + 1, j, -1);
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] == 1;
+						union_find_update(i + 1, j - 1, 1);
+						visited[i + 1][j - 1] = 1;
+					}
 				}
-				if (Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] == 1;
+						union_find_update(i, j + 1, 1);
+						visited[i][j + 1] = 1;
+						Current_board[i - 1][j + 1] == -1;
+						union_find_update(i - 1, j + 1, -1);
+						visited[i - 1][j + 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] == -1;
+						union_find_update(i, j + 1, -1);
+						visited[i + 1][j - 1] = 1;
+						Current_board[i - 1][j + 1] == 1;
+						union_find_update(i - 1, j + 1, 1);
+						visited[i - 1][j + 1] = 1;
+					}
 				}
-				if (Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] == 1;
+						union_find_update(i, j + 1, 1);
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] == -1;
+						union_find_update(i + 1, j, -1);
+						visited[i + 1][j] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] == -1;
+						union_find_update(i, j + 1, -1);
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] == 1;
+						union_find_update(i + 1, j, 1);
+						visited[i + 1][j] = 1;
+					}
 				}
-				if (Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
 				{
-					//随机落点
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j + 1] == 1;
+						union_find_update(i - 1, j + 1, 1);
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] == -1;
+						union_find_update(i, j - 1, -1);
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j + 1] == -1;
+						union_find_update(i - 1, j + 1, -1);
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] == 1;
+						union_find_update(i, j - 1, 1);
+						visited[i][j - 1] = 1;
+					}
 				}
+
+
+				//我方无用位置1
+
+
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 1] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 1][j] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i][j - 2] == 1 && Current_board[i][j - 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 1] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 1][j] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 2] == 1 && Current_board[i][j + 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//我方无用位置2
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 2] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 2][j + 1] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1 && Current_board[i - 1][j - 1] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 2] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 2][j - 1] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1 && Current_board[i + 1][j + 1] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//公共无用位置
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (j - 2 >= 0 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (j + 2 <= 10 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//对方无用位置1
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 1] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 1][j] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i][j - 2] == -1 && Current_board[i][j - 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i][j - 1] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 1] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 1][j] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 2] == -1 && Current_board[i][j + 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//对方无用位置2
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 2] == 1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 2][j + 1] == 1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 2] == 1 && Current_board[i - 1][j - 1] == 1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 2] == 1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 2][j - 1] == 1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 2] == 1 && Current_board[i + 1][j + 1] == 1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+				while (!useless_nodes_x.size())				//随机落子
+				{
+					int x = useless_nodes_x.top();
+					int y = useless_node_y.top();
+					Current_board[x][y] = color;
+					visited[x][y] = 1;
+					union_find_update(x, y, color);
+					useless_nodes_x.pop();
+					useless_node_y.pop();
+					color = -color;
+				}
+
+				visited[i][j] = 1;
 			}
 		}
 	}
-	else						//对方先手
+}
+
+void MCTNode::visited_reset()
+{
+	for (int i = 0; i < 11; i++)
 	{
-		for (int i = 0; i < 11; i++)
+		for (int j = 0; j < 11; j++)
 		{
-			for (int j = 0; j < 11; j++)
-			{
-				//判断金字塔
-				if (i == 1 && Current_board[i][j] == -1)			//高为2的金字塔
-				{
-					if (Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 0)			//金字塔无破坏
-					{
-						//随机落点
-					}
-				}
-				else if (j == 1 && Current_board[i][j] == 1)
-				{
-					if (Current_board[i + 1][j - 1] == 0 && Current_board[i][j - 1] == 0)
-					{
-						//随机落点
-					}
-				}
-				else if (i == 2 && Current_board[i][j] == -1)			//高为3的金字塔，两侧
-				{
-					if (Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 1][j + 2] == 0 && Current_board[i - 2][j + 2] == 0 && Current_board[i - 2][j + 3] == 0)
-					{
-						//随机落点
-					}
-					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 2][j - 1] == 0 && Current_board[i][j] == 0 && Current_board[i - 1][j] == 0 && Current_board[i - 2][j] == 0 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 0 && Current_board[i - 2][j + 2] == 0)
-					{
-						//随机落点
-					}
-				}
-				else if (j == 2 && Current_board[i][j] == 1)
-				{
-					if (Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 1] == 0 && Current_board[i + 2][j - 2] == 0 && Current_board[i + 3][j - 2] == 0)
-					{
-						//随机落点
-					}
-					else if (Current_board[i - 1][j - 1] == 0 && Current_board[i - 1][j - 2] == 0 && Current_board[i][j] == 0 && Current_board[i][j - 1] == 0 && Current_board[i][j - 2] == 0 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 1][j - 2] == 0 && Current_board[i + 2][j - 2] == 0)
-					{
-						//随机落点
-					}
-				}
-			}
+			visited[i][j] = 0;
 		}
 	}
 }

@@ -63,6 +63,8 @@ public:
 	void union_find_update(int x, int y, int color);
 	//找父节点函数
 	Union_node* union_find_father(int x, int y);
+	//初始化的找父节点函数
+	Union_node* union_find_father_first(int x, int y);
 	//并查集重置，退回根结点时使用
 	void union_board_reset();
 	//结构查找重置，返回根节点时使用

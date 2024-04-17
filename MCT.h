@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
+#include <stack>
 using namespace std;
 int Current_board[11][11]={0};			//当前棋局
 int coulor,round0;                             
@@ -16,6 +17,8 @@ struct Union_node
 	int father_y;
 };
 struct Union_node Current_union[11][11];			//并查集
+struct Union_node union_board[11][11];
+stack<int> useless_nodes_x, useless_node_y;
 
 
 
@@ -60,6 +63,10 @@ public:
 	void union_find_update(int x, int y, int color);
 	//找父节点函数
 	Union_node* union_find_father(int x, int y);
+	//并查集重置，退回根结点时使用
+	void union_board_reset();
+	//结构查找重置，返回根节点时使用
+	void visited_reset();
 	//反向传播算分函数
 	void backup(MCTNode* node, double reward);
 	//UCT函数

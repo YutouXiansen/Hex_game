@@ -948,7 +948,7 @@ xgznode** toget_twodis(int** board,int mycolor,int color)
 		}
 		return aim;
 	}
-	else if (mycolor == -1 && color == 1)
+	else if (mycolor == 0 && color == 1)
 	{
 		int** my_bule_twodis_red = mybule_toget_twodis_red(board1);
 		redsort(my_bule_twodis_red);

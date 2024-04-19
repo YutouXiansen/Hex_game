@@ -2562,38 +2562,36 @@ void fill_board();
 					 useless_nodes_x.push(i);
 					 useless_node_y.push(j + 1);
 				 }
-				 
-				 while (useless_nodes_x.size() >= 2)				//随机落子
-				 {
-					 int x = useless_nodes_x.top();
-					 int y = useless_node_y.top();
-					 Current_board[x][y] = 1;
-					 visited[x][y] = 1;
-					 useless_nodes_x.pop();
-					 useless_node_y.pop();
-					 
-					 x = useless_nodes_x.top();
-					 y = useless_node_y.top();
-					 Current_board[x][y] = -1;
-					 visited[x][y] = 1;
-					 useless_nodes_x.pop();
-					 useless_node_y.pop();
-				 }
-				 if(!useless_nodes_x.size())
-				 {
-					int x = useless_nodes_x.top();
-					int y = useless_node_y.top();
-					Current_board[x][y] = 1;
-					visited[x][y] = 1;
-					useless_nodes_x.pop();
-					useless_node_y.pop();
-				 }
-				 
 				 visited[i][j] = 1;
 			 }
 		 }
 	 }
- }
+	while (useless_nodes_x.size() >= 2)				//随机落子
+	{
+		int x = useless_nodes_x.top();
+		int y = useless_node_y.top();
+		Current_board[x][y] = 1;
+		visited[x][y] = 1;
+		useless_nodes_x.pop();
+		useless_node_y.pop();
+	
+		x = useless_nodes_x.top();
+		y = useless_node_y.top();
+		Current_board[x][y] = -1;
+		visited[x][y] = 1;
+		useless_nodes_x.pop();
+		useless_node_y.pop();
+	}
+	if (useless_nodes_x.size())
+	{
+		int x = useless_nodes_x.top();
+		int y = useless_node_y.top();
+		Current_board[x][y] = 1;
+		visited[x][y] = 1;
+		useless_nodes_x.pop();
+		useless_node_y.pop();
+	}
+}
  
  void visited_reset()
  {

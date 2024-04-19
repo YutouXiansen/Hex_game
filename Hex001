@@ -964,7 +964,7 @@ int findseconddis(int i, int j, int flag, int** dis)
 	}
 	for (int k = 2; k < (int)aim.size(); k++)
 	{
-		if (*aim[k] > *min1 && *min2 > *aim[k] || aim[k]->distance == min1->distance)
+		if ((*aim[k] > *min1 && *min2 > *aim[k]) || aim[k]->distance == min1->distance)
 		{
 			min2 = aim[k];
 		}
@@ -1092,17 +1092,17 @@ void Createdis() {
 		board1[i] = new int[RealSIZE];
 	}
 }
-//重置
+/*//重置
 void Deletedis() {
 	for (int i = 0; i < RealSIZE; i++)
 	{
 		delete board1[i];
 	}
 }
+*/
 xgznode** toget_twodis(int mycolor, int color)
 {
 	xgznode_num = need;
-	Createdis();
 	make_real();
 	if (mycolor == 1 && color == 1)//red
 	{
@@ -1121,7 +1121,6 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			redneedsort.pop_back();
 		}
-		Deletedis();
 		return aim;
 	}
 	else if (mycolor == 1 && color == -1)
@@ -1140,7 +1139,6 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			buleneedsort.pop_back();
 		}
-		Deletedis();
 		return aim;
 	}
 	else if (mycolor == 0 && color == 1)
@@ -1159,7 +1157,6 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			redneedsort.pop_back();
 		}
-		Deletedis();
 		return aim;
 	}
 	else
@@ -1178,7 +1175,6 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			buleneedsort.pop_back();
 		}
-		Deletedis();
 		return aim;
 	}
 }
@@ -2669,7 +2665,7 @@ int main()
 		printf("1 2");
 		return 0;
 	}
-	
+	Createdis();
 	memcpy(Current_board, iniboard, 121 * sizeof(int));      //复制棋盘
 	//判断桥是否被破坏（补充）
 	

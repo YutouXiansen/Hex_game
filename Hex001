@@ -2165,6 +2165,7 @@ void fill_board();
  
  void fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
  {
+	int now_color = 1;
 	 for(int i = 0; i < 11; i++)
 	 {
 		 for (int j = 0; j < 11; j++)
@@ -2562,35 +2563,36 @@ void fill_board();
 					 useless_nodes_x.push(i);
 					 useless_node_y.push(j + 1);
 				 }
+				while (useless_nodes_x.size() >= 2)				//随机落子
+				{
+					int x = useless_nodes_x.top();
+					int y = useless_node_y.top();
+					Current_board[x][y] = 1;
+					visited[x][y] = 1;
+					useless_nodes_x.pop();
+					useless_node_y.pop();
+				
+					x = useless_nodes_x.top();
+					y = useless_node_y.top();
+					Current_board[x][y] = -1;
+					visited[x][y] = 1;
+					useless_nodes_x.pop();
+					useless_node_y.pop();
+				}
+				if (useless_nodes_x.size())
+				{
+					int x = useless_nodes_x.top();
+					int y = useless_node_y.top();
+					Current_board[x][y] = now_color;
+					now_color = -now_color;
+					visited[x][y] = 1;
+					useless_nodes_x.pop();
+					useless_node_y.pop();
+				}
 				 visited[i][j] = 1;
 			 }
 		 }
 	 }
-	while (useless_nodes_x.size() >= 2)				//随机落子
-	{
-		int x = useless_nodes_x.top();
-		int y = useless_node_y.top();
-		Current_board[x][y] = 1;
-		visited[x][y] = 1;
-		useless_nodes_x.pop();
-		useless_node_y.pop();
-	
-		x = useless_nodes_x.top();
-		y = useless_node_y.top();
-		Current_board[x][y] = -1;
-		visited[x][y] = 1;
-		useless_nodes_x.pop();
-		useless_node_y.pop();
-	}
-	if (useless_nodes_x.size())
-	{
-		int x = useless_nodes_x.top();
-		int y = useless_node_y.top();
-		Current_board[x][y] = 1;
-		visited[x][y] = 1;
-		useless_nodes_x.pop();
-		useless_node_y.pop();
-	}
 }
  
  void visited_reset()

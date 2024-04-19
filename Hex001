@@ -1,0 +1,2669 @@
+
+#define  _CRT_SECURE_NO_WARNINGS
+#define inf 500
+#include <stack>
+#include <string.h>
+#include <time.h>
+#include <vector>
+#include<algorithm>
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+#include <math.h>
+using namespace std;
+
+
+ //声明全局变量,函数
+ const int SIZE = 11;
+ int iniboard[SIZE][SIZE] = { 0 };//本方1，对方-1，空白0
+ int board[SIZE][SIZE] ={ 0 };
+int Current_board[11][11]={0};			//当前棋局                                     
+int color,round0; 
+int visited[11][11] = { 0 };
+int who_first();			//谁先手,先下返回1,后下返回0
+
+
+struct Union_node
+{
+	int father_x;
+	int father_y;
+};
+struct Union_node Current_union[11][11];			//并查集
+struct Union_node union_board[11][11];
+stack<int> useless_nodes_x, useless_node_y;
+
+class MCTNode
+{
+private:
+	int x,y;
+	vector<MCTNode*> child;			//子节点集合
+	MCTNode* parent;			//父节点，加减分用
+	int score;				//分数
+	int search_time;			//搜索次数
+	int win_time;			//胜利次数
+//	int children_search_time;			//所有子节点搜索次数
+public:
+	MCTNode(MCTNode* parent,int x,int y);
+	//选择子节点，返回值为MCTNode*类型
+	MCTNode* select(MCTNode* node);
+	//拓展该节点，返回值为空
+	MCTNode* expand(MCTNode* node);
+	//模拟，返回值为int类型，判断输赢
+	int simulate();
+	//反向传播算分函数
+	void backup(MCTNode* node, int reward);
+	//UCT函数
+	double UCT();
+	//判断结束
+	int isTerminal();
+	//判断探索完成
+	//	int isAllExpand();
+	//选择最好子节点
+	MCTNode* bestChild(MCTNode* node);
+	//全过程
+	MCTNode* monteCarloTreeSearch(int x,int y); 
+	void Result_Output();
+	
+};
+struct randomnode{
+	int x;
+	int y;
+	int whatcolor;
+};
+
+const int SIZE1 = 15;
+const int RealSIZE = 13;
+const int need = 6;
+int xgznode_num = 6;
+int** board1 = new int* [RealSIZE];
+struct xgznode
+{
+	int i;
+	int j;
+	int distance;
+};
+
+bool  operator > (xgznode a, xgznode b)
+{
+	if (a.distance > b.distance)
+		return true;
+	else
+		return false;
+}
+
+vector <xgznode> redneedsort;
+vector <xgznode> buleneedsort;
+
+int** myred_twodis_bule_to_A0();    // red = 1    blue = -1
+int** myred_twodis_bule_to_A10();
+int** myred_twodis_red_to_A0();
+int** myred_twodis_red_to_A10();
+int** mybule_twodis_bule_to_A0();   // red = -1    blue = 1
+int** mybule_twodis_bule_to_A10();
+int** mybule_twodis_red_to_A0();
+int** mybule_twodis_red_to_A10();
+int findseconddis(int i, int j,int flag,int** dis);      //flag = 1  ---> count 1
+void make_real();
+void redsort(int** dis_red);
+void bulesort(int** dis_bule);
+int** myred_toget_twodis_red();
+int** myred_toget_twodis_bule();
+int** mybule_toget_twodis_bule();
+int** mybule_toget_twodis_red();
+void Createdis();
+void Deletedis();
+//int getpot();
+xgznode** toget_twodis(int mycolor , int color);
+
+
+
+
+//判断输赢函数
+int is_win();
+//并查集初始化
+void union_find();
+//落点时并查集的更新
+void union_find_update(int x, int y, int color);
+//找父节点函数
+Union_node* union_find_father(int x, int y);
+//初始化的找父节点函数
+Union_node* union_find_father_first(int x, int y);
+//并查集重置，退回根结点时使用
+void union_board_reset();
+//结构查找重置，返回根节点时使用
+void visited_reset();
+//填充特殊结构的函数
+void fill_board();
+
+
+
+
+
+
+
+ //定义全局变量,函数
+ void make_real()
+ {
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 board1[i + 1][j + 1] = Current_board[i][j];
+		 }
+	 }
+	 return;
+ }
+ 
+ int** myred_twodis_bule_to_A0() // red = 1    blue = -1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = 1;
+		 board1[12][i] = 1;
+		 board1[i][0] = -1;
+		 board1[i][12] = -1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][1] == -1)
+		 {
+			 dis[i][1] = 0;
+		 }
+		 else if (board1[i][1] == 0)
+		 {
+			 dis[i][1] = 1;
+		 }
+		 else
+		 {
+			 dis[i][1] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 1; i <= 11; i++)
+		 {
+			 for (int j = 1; j <= 11; j++)
+			 {
+				 int distemp = findseconddis(i, j, -1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** myred_twodis_bule_to_A10()  // red = 1    blue = -1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = 1;
+		 board1[12][i] = 1;
+		 board1[i][0] = -1;
+		 board1[i][12] = -1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][11] == -1)
+		 {
+			 dis[i][11] = 0;
+		 }
+		 else if (board1[i][11] == 0)
+		 {
+			 dis[i][11] = 1;
+		 }
+		 else
+		 {
+			 dis[i][11] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 11; i > 0; i--)
+		 {
+			 for (int j = 11; j > 0; j--)
+			 {
+				 int distemp = findseconddis(i, j, -1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** myred_twodis_red_to_A0() // red = 1    blue = -1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = 1;
+		 board1[12][i] = 1;
+		 board1[i][0] = -1;
+		 board1[i][12] = -1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][1] == -1)
+		 {
+			 dis[i][1] = 0;
+		 }
+		 else if (board1[i][1] == 0)
+		 {
+			 dis[i][1] = 1;
+		 }
+		 else
+		 {
+			 dis[i][1] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 1; i <= 11; i++)
+		 {
+			 for (int j = 1; j <= 11; j++)
+			 {
+				 int distemp = findseconddis(i, j, 1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** myred_twodis_red_to_A10()  // red = 1    blue = -1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = 1;
+		 board1[12][i] = 1;
+		 board1[i][0] = -1;
+		 board1[i][12] = -1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][11] == -1)
+		 {
+			 dis[i][11] = 0;
+		 }
+		 else if (board1[i][11] == 0)
+		 {
+			 dis[i][11] = 1;
+		 }
+		 else
+		 {
+			 dis[i][11] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 11; i > 0; i--)
+		 {
+			 for (int j = 11; j > 0; j--)
+			 {
+				 int distemp = findseconddis(i, j, 1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** mybule_twodis_bule_to_A0() // red = -1    blue = 1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = -1;
+		 board1[12][i] = -1;
+		 board1[i][0] = 1;
+		 board1[i][12] = 1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][1] == -1)
+		 {
+			 dis[i][1] = 0;
+		 }
+		 else if (board1[i][1] == 0)
+		 {
+			 dis[i][1] = 1;
+		 }
+		 else
+		 {
+			 dis[i][1] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 1; i <= 11; i++)
+		 {
+			 for (int j = 1; j <= 11; j++)
+			 {
+				 int distemp = findseconddis(i, j, 1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** mybule_twodis_bule_to_A10()  // red = -1    blue = 1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = -1;
+		 board1[12][i] = -1;
+		 board1[i][0] = 1;
+		 board1[i][12] = 1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][11] == -1)
+		 {
+			 dis[i][11] = 0;
+		 }
+		 else if (board1[i][11] == 0)
+		 {
+			 dis[i][11] = 1;
+		 }
+		 else
+		 {
+			 dis[i][11] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 11; i > 0; i--)
+		 {
+			 for (int j = 11; j > 0; j--)
+			 {
+				 int distemp = findseconddis(i, j, 1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** mybule_twodis_red_to_A0() // red = -1    blue = 1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = -1;
+		 board1[12][i] = -1;
+		 board1[i][0] = 1;
+		 board1[i][12] = 1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][1] == -1)
+		 {
+			 dis[i][1] = 0;
+		 }
+		 else if (board1[i][1] == 0)
+		 {
+			 dis[i][1] = 1;
+		 }
+		 else
+		 {
+			 dis[i][1] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 1; i <= 11; i++)
+		 {
+			 for (int j = 1; j <= 11; j++)
+			 {
+				 int distemp = findseconddis(i, j, -1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int** mybule_twodis_red_to_A10()  // red = -1    blue = 1
+ {
+	 for (int i = 0; i < 13; i++)
+	 {
+		 board1[0][i] = -1;
+		 board1[12][i] = -1;
+		 board1[i][0] = 1;
+		 board1[i][12] = 1;
+	 }
+	 int** dis = new int* [RealSIZE];
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 dis[i] = new int[RealSIZE];
+	 }
+	 fill(dis[0], dis[0] + RealSIZE * RealSIZE, 128);
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 if (board1[i][11] == -1)
+		 {
+			 dis[i][11] = 0;
+		 }
+		 else if (board1[i][11] == 0)
+		 {
+			 dis[i][11] = 1;
+		 }
+		 else
+		 {
+			 dis[i][11] = inf;
+		 }
+	 }
+	 for (int i = 1; i <= 11; i++)
+	 {
+		 for (int j = 1; j <= 11; j++)
+		 {
+			 if (board1[i][j] == -1)
+			 {
+				 dis[i][j] = 0;
+			 }
+			 if (board1[i][j] == 1)
+			 {
+				 dis[i][j] = inf;
+			 }
+		 }
+	 }
+	 int flag = 0;
+	 while (1)
+	 {
+		 for (int i = 11; i > 0; i--)
+		 {
+			 for (int j = 11; j > 0; j--)
+			 {
+				 int distemp = findseconddis(i, j, -1, dis);
+				 if (distemp != dis[i][j])
+				 {
+					 flag = 1;
+					 dis[i][j] = distemp;
+				 }
+			 }
+		 }
+		 if (flag == 0)
+			 break;
+	 }
+	 return dis;
+ }
+ 
+ int findseconddis(int i, int j, int flag, int** dis)
+ {
+	 vector <xgznode*> aim;
+	 vector <xgznode*> temp;
+	 xgznode* t1 = new xgznode;
+	 t1->i = i;
+	 t1->j = j;
+	 temp.push_back(t1);
+	 int newflag = 0;
+	 while (newflag == 1)
+	 {
+		 newflag = 0;
+		 xgznode* a = temp.back();
+		 if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i && aim[i]->j == a->j - 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i;
+				 t11->j = a->j - 1;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i && temp[i]->j == a->j - 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i;
+				 t11->j = a->j - 1;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+		 
+		 if (a->j + 1 < 13 && board1[a->i][a->j + 1] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i && aim[i]->j == a->j + 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i;
+				 t11->j = a->j + 1;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->j + 1 < 13 && board1[a->i][a->j + 1] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i && temp[i]->j == a->j + 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i;
+				 t11->j = a->j + 1;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+		 
+		 if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i - 1 && aim[i]->j == a->j)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i - 1;
+				 t11->j = a->j;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i - 1 && temp[i]->j == a->j)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i - 1;
+				 t11->j = a->j;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+		 
+		 if (a->i + 1 < 13 && board1[a->i + 1][a->j] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i + 1 && aim[i]->j == a->j)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i + 1;
+				 t11->j = a->j;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->i + 1 < 13 && board1[a->i + 1][a->j] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i + 1 && temp[i]->j == a->j)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i + 1;
+				 t11->j = a->j;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+		 
+		 if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i + 1 && aim[i]->j == a->j - 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i + 1;
+				 t11->j = a->j - 1;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i + 1 && temp[i]->j == a->j - 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i + 1;
+				 t11->j = a->j - 1;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+		 
+		 if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == 0)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)aim.size(); i++)
+			 {
+				 if (aim[i]->i == a->i - 1 && aim[i]->j == a->j + 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i - 1;
+				 t11->j = a->j + 1;
+				 aim.push_back(t11);
+			 }
+		 }
+		 else if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == flag)
+		 {
+			 int s1flag = 0;
+			 for (int i = 0; i < (int)temp.size(); i++)
+			 {
+				 if (temp[i]->i == a->i - 1 && temp[i]->j == a->j + 1)
+				 {
+					 s1flag = 1;
+				 }
+			 }
+			 if (s1flag == 0)
+			 {
+				 xgznode* t11 = new xgznode;
+				 t11->i = a->i - 1;
+				 t11->j = a->j + 1;
+				 temp.push_back(t11);
+				 newflag = 1;
+			 }
+		 }
+	 }
+	 for (int k = 0; k < (int)aim.size(); k++)
+	 {
+		 aim[k]->distance = dis[aim[k]->i][aim[k]->j];
+	 }
+	 
+	 xgznode* min1 = aim[0];
+	 xgznode* min2 = aim[1];
+	 if (*min1 > *min2)
+	 {
+		 min1 = aim[1];
+		 min2 = aim[0];
+	 }
+	 for (int k = 2; k < (int)aim.size(); k++)
+	 {
+		 if (*min1 > *aim[k])
+		 {
+			 min2 = min1;
+			 min1 = aim[k];
+		 }
+		 if (*aim[k] > *min1 && *min2 > *aim[k])
+		 {
+			 min2 = aim[k];
+		 }
+	 }
+	 return min2->distance + 1;
+ }
+ 
+ int** myred_toget_twodis_red()
+ {
+	 int** twodis_red = new int* [11];
+	 for (int i = 0; i < 11; i++)
+	 {
+		 twodis_red[i] = new int[11];
+	 }
+	 int** dis1 = myred_twodis_red_to_A0();
+	 int** dis2 = myred_twodis_red_to_A10();
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 twodis_red[i][j] = dis1[i + 1][j + 1] + dis2[i + 1][j + 1];
+		 }
+	 }
+	 return twodis_red;
+ }
+ 
+ int** myred_toget_twodis_bule()
+ {
+	 int** twodis_bule = new int* [11];
+	 for (int i = 0; i < 11; i++)
+	 {
+		 twodis_bule[i] = new int[11];
+	 }
+	 int** dis1 = myred_twodis_bule_to_A0();
+	 int** dis2 = myred_twodis_bule_to_A10();
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 twodis_bule[i][j] = dis1[i + 1][j + 1] + dis2[i + 1][j + 1];
+		 }
+	 }
+	 return twodis_bule;
+ }
+ 
+ int** mybule_toget_twodis_bule()
+ {
+	 int** twodis_bule = new int* [11];
+	 for (int i = 0; i < 11; i++)
+	 {
+		 twodis_bule[i] = new int[11];
+	 }
+	 int** dis1 = mybule_twodis_bule_to_A0();
+	 int** dis2 = mybule_twodis_bule_to_A10();
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 twodis_bule[i][j] = dis1[i + 1][j + 1] + dis2[i + 1][j + 1];
+		 }
+	 }
+	 return twodis_bule;
+ }
+ 
+ int** mybule_toget_twodis_red()
+ {
+	 int** twodis_red = new int* [11];
+	 for (int i = 0; i < 11; i++)
+	 {
+		 twodis_red[i] = new int[11];
+	 }
+	 int** dis1 = mybule_twodis_red_to_A0();
+	 int** dis2 = mybule_twodis_red_to_A10();
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 twodis_red[i][j] = dis1[i + 1][j + 1] + dis2[i + 1][j + 1];
+		 }
+	 }
+	 return twodis_red;
+ }
+ 
+ void redsort(int** twodis_red)
+ {
+	 for (int i = 1; i < 13; i++)
+	 {
+		 for (int j = 1; j < 13; j++)
+		 {
+			 xgznode temp;
+			 temp.i = i;
+			 temp.j = j;
+			 temp.distance = twodis_red[i][j];
+			 redneedsort.push_back(temp);
+		 }
+	 }
+	 sort(redneedsort.begin(), redneedsort.end(), greater<xgznode>());
+ }
+ 
+ void bulesort(int** twodis_bule)
+ {
+	 for (int i = 1; i < 13; i++)
+	 {
+		 for (int j = 1; j < 13; j++)
+		 {
+			 xgznode temp;
+			 temp.i = i;
+			 temp.j = j;
+			 temp.distance = twodis_bule[i][j];
+			 buleneedsort.push_back(temp);
+		 }
+	 }
+	 sort(buleneedsort.begin(), buleneedsort.end(), greater<xgznode>());
+ }
+ //初始化
+ void Createdis(){
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 board1[i] = new int[RealSIZE];
+	 }
+ }
+ //重置
+ void Deletedis(){
+	 for (int i = 0; i < RealSIZE; i++)
+	 {
+		 delete board1[i];
+	 }
+ }
+ xgznode** toget_twodis(int mycolor,int color)
+ {
+     xgznode_num = need;
+	 Createdis();
+	 make_real();
+	 if (mycolor == 1 && color == 1)//red
+	 {
+		
+		 int** my_red_twodis_red = myred_toget_twodis_red();
+		 redsort(my_red_twodis_red);
+		 if (redneedsort.size() < need)
+			 xgznode_num = redneedsort.size();
+		 xgznode** aim = new xgznode* [xgznode_num];
+		 for (int i = 0; i < xgznode_num; i++)
+		 {
+			 aim[i] = &redneedsort.back();
+			 redneedsort.pop_back();
+		 }
+		 while (!redneedsort.empty())
+		 {
+			 redneedsort.pop_back();
+		 }
+		 Deletedis();
+		 return aim;
+	 }
+	 else if (mycolor == 1 && color == -1)
+	 {
+		 int** my_red_twodis_bule = myred_toget_twodis_bule();
+		 bulesort(my_red_twodis_bule);
+		 if (buleneedsort.size() < need)
+			 xgznode_num = buleneedsort.size();
+		 xgznode** aim = new xgznode * [xgznode_num];
+		 for (int i = 0; i < xgznode_num; i++)
+		 {
+			 aim[i] = &buleneedsort.back();
+			 buleneedsort.pop_back();
+		 }
+		 while (!buleneedsort.empty())
+		 {
+			 buleneedsort.pop_back();
+		 }
+		  Deletedis();
+		 return aim;
+	 }
+	 else if (mycolor == 0 && color == 1)
+	 {
+		 int** my_bule_twodis_red = mybule_toget_twodis_red();
+		 redsort(my_bule_twodis_red);
+		 if (redneedsort.size() < need)
+			 xgznode_num = redneedsort.size();
+		 xgznode** aim = new xgznode * [xgznode_num];
+		 for (int i = 0; i < xgznode_num; i++)
+		 {
+			 aim[i] = &redneedsort.back();
+			 redneedsort.pop_back();
+		 }
+		 while (!redneedsort.empty())
+		 {
+			 redneedsort.pop_back();
+		 }
+		  Deletedis();
+		 return aim;
+	 }
+	 else
+	 {
+		 int** my_bule_twodis_bule = mybule_toget_twodis_bule();
+		 bulesort(my_bule_twodis_bule);
+		 if (buleneedsort.size() < need)
+			 xgznode_num = buleneedsort.size();
+		 xgznode** aim = new xgznode * [xgznode_num];
+		 for (int i = 0; i < xgznode_num; i++)
+		 {
+			 aim[i] = &buleneedsort.back();
+			 buleneedsort.pop_back();
+		 }
+		 while (!buleneedsort.empty())
+		 {
+			 buleneedsort.pop_back();
+		 }
+		  Deletedis();
+		 return aim;
+	 }
+ }
+ 
+ 
+ 
+ 
+
+ //判断深度
+ int MCTNode::isTerminal(){
+	 int depth=0;
+	 MCTNode* ptr = this;
+	 while(ptr->parent!=nullptr){
+		 depth++;
+		 ptr=ptr->parent;
+	 }
+	 if(depth<=6){
+		 return 0;
+	 }
+	 else{
+		 return 1;
+	 }
+ }
+ 
+ //输出结果
+ void MCTNode::Result_Output(){
+    printf("%d %d",this->x,this->y);
+ }
+ 
+ MCTNode::MCTNode(MCTNode* parent, int x, int y)
+ {
+	 this->parent = parent;
+	 this->score = 0;
+	 this->search_time = 0;
+	 this->x = x, this->y = y;
+ }
+ 
+ double MCTNode::UCT()
+ {
+	 return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
+ }
+ 
+ MCTNode* MCTNode::expand(MCTNode* node) {
+	 //双距离选点
+	 int mycolor = who_first();
+	 struct xgznode** better_choice = toget_twodis(mycolor,color);
+	 MCTNode* new_node;
+	 
+	 for (int k = xgznode_num-1 ; k >= 0; k++) {
+		 
+		 new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
+		 node->child.emplace_back(new_node);
+	 }
+	 return new_node;
+ }
+ 
+ MCTNode* MCTNode::select(MCTNode* node)
+ {
+	 color = 1;
+	 while (node->isTerminal()== 0 ) {
+		 if (!node->child.empty()) {
+			 node = node->bestChild(node);
+		 }
+		 else {
+			 node = node->expand(node);
+			 //				return sub_node;
+		 }
+		 
+		 //补充并查集
+		 union_find_update(node->x, node->y,color);
+		 //补充棋盘
+		 Current_board[node->x][node->y] = color;
+		 color = -color;
+		 
+	 }
+ 
+	 return node;
+	 
+ }
+ //达到层数后随机落点
+ int MCTNode::simulate() {
+	 vector<randomnode> fillend;
+	 randomnode ran;
+	 for(int i=0;i<11;i++){
+		 for(int j=0;j<11;j++){
+			if( Current_board[i][j] == 0 ){
+				ran.x=i,ran.y=j;
+				fillend.emplace_back(ran);
+			}
+		 }
+	 }
+	 for(int k=0;k<(int)fillend.size();k++){
+	    random_shuffle(fillend.begin(), fillend.end()-k);
+		fillend[0].whatcolor=color;
+		Current_board[fillend[0].x][fillend[0].y]=fillend[0].whatcolor;
+		union_find_update(fillend[0].x,fillend[0].y,fillend[0].whatcolor);
+		color=-color;
+		if( is_win() !=0 ){
+			return is_win();
+		}
+		swap(fillend[0],fillend[(int)fillend.size()-k]);
+	 }
+	 return is_win();
+ }
+ 
+ void MCTNode::backup(MCTNode* node, int reward) {
+	 while (node != nullptr) {
+		 if(Current_board[node->x][node->y]==reward){
+		    node->win_time+=reward;
+		 }
+		 node->search_time++;
+		 node = node->parent;
+	 }
+ }
+ int is_win()				//我方赢了返回1，对方赢了返回-1，未结束返回0
+ {
+	 if (Current_board[1][2] == 1)			//我方先手
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 if (Current_union[10][j].father_x == 0)
+				 return 1;
+		 }
+		 for (int i = 0; i < 11; i++)
+		 {
+			 if (Current_union[i][10].father_y == 0)
+				 return -1;
+		 }
+		 return 0;
+	 }
+	 else if (Current_board[1][2] == -1)			//对方先手
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 if (Current_union[10][j].father_x == 0)
+				 return -1;
+		 }
+		 for (int i = 0; i < 11; i++)
+		 {
+			 if (Current_union[i][10].father_y == 0)
+				 return 1;
+		 }
+		 return 0;
+	 }
+	 return 0;
+ }
+ 
+ void union_find()			//棋盘并查集初始化
+ {
+	 if(Current_board[1][2] == 1)			//我方先手，从i/x == 0到 i/x == 10
+	 {
+		 for (int i = 0; i < 11; i++)
+		 {
+			 for (int j = 0; j < 11; j++)
+			 {
+				 if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
+				 {
+					 union_board[i][j].father_x = i;
+					 union_board[i][j].father_y = j;
+				 }
+			 }
+		 }
+		 for (int i = 0; i < 11; i++)
+		 {
+			 for (int j = 0; j < 11; j++)
+			 {
+				 if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+				 {
+					 ;
+				 }
+				 else if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+				 {
+					 if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i, j - 1)->father_x)
+						 {
+							 union_find_father_first(i, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i, j - 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i, j - 1)->father_y;
+						 }
+					 }
+					 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i + 1, j - 1)->father_x)
+						 {
+							 union_find_father_first(i + 1, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i + 1, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j - 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j - 1)->father_y;
+						 }
+					 }
+					 if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i + 1, j)->father_x)
+						 {
+							 union_find_father_first(i + 1, j)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i + 1, j)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j)->father_y;
+						 }
+					 }
+					 if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i, j + 1)->father_x)
+						 {
+							 union_find_father_first(i, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i, j + 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i, j + 1)->father_y;
+						 }
+					 }
+					 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i - 1, j + 1)->father_x)
+						 {
+							 union_find_father_first(i - 1, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i - 1, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j + 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j + 1)->father_y;
+						 }
+					 }
+					 if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i - 1, j)->father_x)
+						 {
+							 union_find_father_first(i - 1, j)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i - 1, j)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j)->father_y;
+						 }
+					 }
+				 }
+			 }
+			 for (int j = 0; j < 11; j++)
+			 {
+				 for (int i = 0; i < 11; i++)
+				 {
+					 if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+					 {
+						 ;
+					 }
+					 else if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+					 {
+						 if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i, j - 1)->father_y)
+							 {
+								 union_find_father_first(i, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i, j - 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i, j - 1)->father_y;
+							 }
+						 }
+						 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i + 1, j - 1)->father_y)
+							 {
+								 union_find_father_first(i + 1, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i + 1, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j - 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j - 1)->father_y;
+							 }
+						 }
+						 if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i + 1, j)->father_y)
+							 {
+								 union_find_father_first(i + 1, j)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i + 1, j)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j)->father_y;
+							 }
+						 }
+						 if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i, j + 1)->father_y)
+							 {
+								 union_find_father_first(i, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i, j + 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i, j + 1)->father_y;
+							 }
+						 }
+						 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i - 1, j + 1)->father_y)
+							 {
+								 union_find_father_first(i - 1, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i - 1, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j + 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j + 1)->father_y;
+							 }
+						 }
+						 if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i - 1, j)->father_y)
+							 {
+								 union_find_father_first(i - 1, j)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i - 1, j)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j)->father_y;
+							 }
+						 }
+					 }
+				 }
+			 }
+		 }
+	 }
+	 else if (Current_board[1][2] == -1)			//对方先手
+	 {
+		 for (int i = 0; i < 11; i++)
+		 {
+			 for (int j = 0; j < 11; j++)
+			 {
+				 if (Current_board[i][j] == 1 || Current_board[i][j] == -1)			//对任意一方，父节点均先是自己
+				 {
+					 union_board[i][j].father_x = i;
+					 union_board[i][j].father_y = j;
+				 }
+			 }
+		 }
+		 for (int i = 0; i < 11; i++)
+		 {
+			 for (int j = 0; j < 11; j++)
+			 {
+				 if (i == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+				 {
+					 ;
+				 }
+				 else if (Current_board[i][j] == -1)			//对对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+				 {
+					 if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i, j - 1)->father_x)
+						 {
+							 union_find_father_first(i, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i, j - 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i, j - 1)->father_y;
+						 }
+					 }
+					 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i + 1, j - 1)->father_x)
+						 {
+							 union_find_father_first(i + 1, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i + 1, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j - 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j - 1)->father_y;
+						 }
+					 }
+					 if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i + 1, j)->father_x)
+						 {
+							 union_find_father_first(i + 1, j)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i + 1, j)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j)->father_y;
+						 }
+					 }
+					 if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i, j + 1)->father_x)
+						 {
+							 union_find_father_first(i, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i, j + 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i, j + 1)->father_y;
+						 }
+					 }
+					 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i - 1, j + 1)->father_x)
+						 {
+							 union_find_father_first(i - 1, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i - 1, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j + 1)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j + 1)->father_y;
+						 }
+					 }
+					 if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+					 {
+						 if (union_find_father_first(i, j)->father_x <= union_find_father_first(i - 1, j)->father_x)
+						 {
+							 union_find_father_first(i - 1, j)->father_x = union_find_father_first(i, j)->father_x;
+							 union_find_father_first(i - 1, j)->father_y = union_find_father_first(i, j)->father_y;
+						 }
+						 else
+						 {
+							 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j)->father_x;
+							 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j)->father_y;
+						 }
+					 }
+				 }
+			 }
+			 for (int j = 0; j < 11; j++)
+			 {
+				 for (int i = 0; i < 11; i++)
+				 {
+					 if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+					 {
+						 ;
+					 }
+					 else if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+					 {
+						 if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i, j - 1)->father_y)
+							 {
+								 union_find_father_first(i, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i, j - 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i, j - 1)->father_y;
+							 }
+						 }
+						 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i + 1, j - 1)->father_y)
+							 {
+								 union_find_father_first(i + 1, j - 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i + 1, j - 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j - 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j - 1)->father_y;
+							 }
+						 }
+						 if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i + 1, j)->father_y)
+							 {
+								 union_find_father_first(i + 1, j)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i + 1, j)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i + 1, j)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i + 1, j)->father_y;
+							 }
+						 }
+						 if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i, j + 1)->father_y)
+							 {
+								 union_find_father_first(i, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i, j + 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i, j + 1)->father_y;
+							 }
+						 }
+						 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i - 1, j + 1)->father_y)
+							 {
+								 union_find_father_first(i - 1, j + 1)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i - 1, j + 1)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j + 1)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j + 1)->father_y;
+							 }
+						 }
+						 if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+						 {
+							 if (union_find_father_first(i, j)->father_y <= union_find_father_first(i - 1, j)->father_y)
+							 {
+								 union_find_father_first(i - 1, j)->father_x = union_find_father_first(i, j)->father_x;
+								 union_find_father_first(i - 1, j)->father_y = union_find_father_first(i, j)->father_y;
+							 }
+							 else
+							 {
+								 union_find_father_first(i, j)->father_x = union_find_father_first(i - 1, j)->father_x;
+								 union_find_father_first(i, j)->father_y = union_find_father_first(i - 1, j)->father_y;
+							 }
+						 }
+					 }
+				 }
+			 }
+		 }
+	 }
+	 
+	 //当前并查集的构建
+	 
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 Current_union[i][j].father_x = union_board[i][j].father_x;
+			 Current_union[i][j].father_y = union_board[i][j].father_y;
+		 }
+	 }
+ }
+ 
+ void union_board_reset()
+ {
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 Current_union[i][j].father_x = union_board[i][j].father_x;
+			 Current_union[i][j].father_y = union_board[i][j].father_y;
+		 }
+	 }
+ }
+ 
+ void union_find_update(int i, int j, int color)			//落点时并查集更新
+ {
+	 if (Current_board[1][2] == 1)			//我方先手
+	 {
+		 if(color == 1)			//我方落子
+		 {
+			 if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+			 {
+				 ;
+			 }
+			 else if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			 {
+				 if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+					 {
+						 union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					 }
+				 }
+				 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+					 {
+						 union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					 }
+				 }
+				 if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+					 {
+						 union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					 }
+				 }
+				 if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+					 {
+						 union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+					 {
+						 union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+					 {
+						 union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					 }
+				 }
+			 }
+		 }
+		 if (color == -1)			//对方落子
+		 {
+			 if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是自己
+			 {
+				 ;
+			 }
+			 else if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			 {
+				 if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+					 {
+						 union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					 }
+				 }
+				 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+					 {
+						 union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					 }
+				 }
+				 if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+					 {
+						 union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					 }
+				 }
+				 if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+					 {
+						 union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+					 {
+						 union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+					 {
+						 union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					 }
+				 }
+			 }
+		 }
+	 }
+	 else if (Current_board[1][2] == -1)			//对方先手
+	 {
+		 if (color == -1)			//对方落子
+		 {
+			 if (i == 0 && Current_board[i][j] == -1)				//对方，且第一排元素，父节点就是自己
+			 {
+				 ;
+			 }
+			 else if (Current_board[i][j] == -1)			//对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			 {
+				 if (j - 1 >= 0 && Current_board[i][j - 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i, j - 1)->father_x)
+					 {
+						 union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					 }
+				 }
+				 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j - 1)->father_x)
+					 {
+						 union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					 }
+				 }
+				 if (i + 1 <= 10 && Current_board[i + 1][j] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i + 1, j)->father_x)
+					 {
+						 union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					 }
+				 }
+				 if (j + 1 <= 10 && Current_board[i][j + 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i, j + 1)->father_x)
+					 {
+						 union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j + 1)->father_x)
+					 {
+						 union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && Current_board[i - 1][j] == -1)
+				 {
+					 if (union_find_father(i, j)->father_x <= union_find_father(i - 1, j)->father_x)
+					 {
+						 union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					 }
+				 }
+			 }
+		 }
+		 if (color == 1)			//我方落子
+		 {
+			 if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是自己
+			 {
+				 ;
+			 }
+			 else if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
+			 {
+				 if (j - 1 >= 0 && Current_board[i][j - 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i, j - 1)->father_y)
+					 {
+						 union_find_father(i, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j - 1)->father_y;
+					 }
+				 }
+				 if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j - 1)->father_y)
+					 {
+						 union_find_father(i + 1, j - 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j - 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j - 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j - 1)->father_y;
+					 }
+				 }
+				 if (i + 1 <= 10 && Current_board[i + 1][j] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i + 1, j)->father_y)
+					 {
+						 union_find_father(i + 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i + 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i + 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i + 1, j)->father_y;
+					 }
+				 }
+				 if (j + 1 <= 10 && Current_board[i][j + 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i, j + 1)->father_y)
+					 {
+						 union_find_father(i, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 1 <= 10 && Current_board[i - 1][j + 1] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j + 1)->father_y)
+					 {
+						 union_find_father(i - 1, j + 1)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j + 1)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j + 1)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j + 1)->father_y;
+					 }
+				 }
+				 if (i - 1 >= 0 && Current_board[i - 1][j] == 1)
+				 {
+					 if (union_find_father(i, j)->father_y <= union_find_father(i - 1, j)->father_y)
+					 {
+						 union_find_father(i - 1, j)->father_x = union_find_father(i, j)->father_x;
+						 union_find_father(i - 1, j)->father_y = union_find_father(i, j)->father_y;
+					 }
+					 else
+					 {
+						 union_find_father(i, j)->father_x = union_find_father(i - 1, j)->father_x;
+						 union_find_father(i, j)->father_y = union_find_father(i - 1, j)->father_y;
+					 }
+				 }
+			 }
+		 }
+	 }
+ }
+ 
+ Union_node* union_find_father(int x, int y)			//寻找并查集根结点
+ {
+	 if (Current_union[x][y].father_x == x && Current_union[x][y].father_y == y)				//根结点是自己，直接返回
+		 return &Current_union[x][y];
+	 else				//根结点不是自己，获取后更新
+	 {
+		 struct Union_node* final_father;
+		 final_father = union_find_father(Current_union[x][y].father_x, Current_union[x][y].father_y);
+		 Current_union[x][y].father_x = final_father->father_x;
+		 Current_union[x][y].father_y = final_father->father_y;
+		 return final_father;
+	 }
+ }
+ 
+ Union_node* union_find_father_first(int x, int y)			//寻找并查集根结点
+ {
+	 if (union_board[x][y].father_x == x && union_board[x][y].father_y == y)				//根结点是自己，直接返回
+		 return &union_board[x][y];
+	 else				//根结点不是自己，获取后更新
+	 {
+		 struct Union_node* final_father;
+		 final_father = union_find_father_first(union_board[x][y].father_x, union_board[x][y].father_y);
+		 union_board[x][y].father_x = final_father->father_x;
+		 union_board[x][y].father_y = final_father->father_y;
+		 return final_father;
+	 }
+ }
+ 
+ MCTNode* MCTNode::bestChild(MCTNode* node) 
+ {
+	 int UCT_number = 0;
+	 MCTNode* best = NULL;
+	 vector<MCTNode*>::iterator p = node->child.begin();
+	 for (; p != node->child.end(); p++)
+	 {
+		 if ((*p)->search_time == 0)
+			 return (*p);
+		 else if (UCT_number < (*p)->UCT())
+			 best = (*p);
+	 }
+	 return best;
+ }
+ 
+ //谁先下
+ int who_first(){
+	 if(board[1][2]==-1){
+		 return 0;//对面先下
+	 }
+	 else{
+		 return 1;//我们先下
+	 }
+ }
+ 
+ MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
+
+	 MCTNode* bestchoice;
+	 MCTNode* root = new MCTNode(nullptr, x, y);
+	 memcpy(board,Current_board,121 * sizeof(int));        //蒙特卡洛重置用的board初始化
+	 
+	 
+	 //卡秒退
+	 int threshold = 0.8 * (double)CLOCKS_PER_SEC; //CLOCKS_PER_SEC 和 clock()的含义可百度
+	 int start_time, current_time;
+	 start_time = current_time = clock();
+	 while (current_time-start_time < threshold){ //到 0.8 秒立即跳出循环
+		 
+		 visited_reset();
+		 union_board_reset();                                  //变化并查集初始化
+		 memcpy(Current_board,board,121*sizeof(int));
+		 MCTNode* expand_node = root->select(root);
+		 int reward = expand_node->simulate();
+		 backup(expand_node, reward);
+		 
+		 current_time = clock();
+	 }
+	 	
+	double final=0;
+	for(int i = 0; i < (int)root -> child.size(); i++)
+	{
+		int node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
+		if( final < node_score)
+		{
+			final = node_score;
+			bestchoice=root->child[i];
+		}
+	}
+
+	 
+	 return bestchoice;
+ }
+ 
+ void fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
+ {
+	 for(int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 if(visited[i][j] == 0)			//该点不是自己填的
+			 {
+				 //我方六个桥||||||else里是脆弱的桥
+				 
+				 
+				 if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i - 1][j] = 1;
+						 visited[i - 1][j] = 1;
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i - 1][j] = -1;
+						 visited[i - 1][j] = 1;
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+						 Current_board[i + 1][j - 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+						 Current_board[i + 1][j - 1] = 1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i + 1][j] = 1;
+						 visited[i + 1][j] = 1;
+						 Current_board[i + 1][j - 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i + 1][j] = -1;
+						 visited[i + 1][j] = 1;
+						 Current_board[i + 1][j - 1] = 1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j + 1] = 1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i - 1][j + 1] = -1;
+						 visited[i - 1][j + 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j + 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+						 Current_board[i - 1][j + 1] = 1;
+						 visited[i - 1][j + 1] = 1;
+					 }
+				 }
+				 if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j + 1] = 1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i + 1][j] = -1;
+						 visited[i + 1][j] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j + 1] = -1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i + 1][j] = 1;
+						 visited[i + 1][j] = 1;
+					 }
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i - 1][j + 1] = 1;
+						 visited[i - 1][j + 1] = 1;
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i - 1][j + 1] = -1;
+						 visited[i - 1][j + 1] = 1;
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+					 }
+				 }
+				 
+				 
+				 //对方六个桥
+				 
+				 
+				 if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i - 1][j] = 1;
+						 visited[i - 1][j] = 1;
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i - 1][j] = -1;
+						 visited[i - 1][j] = 1;
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+						 Current_board[i + 1][j - 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+						 Current_board[i + 1][j - 1] = 1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i + 1][j] = 1;
+						 visited[i + 1][j] = 1;
+						 Current_board[i + 1][j - 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i + 1][j] = -1;
+						 visited[i + 1][j] = 1;
+						 Current_board[i + 1][j - 1] = 1;
+						 visited[i + 1][j - 1] = 1;
+					 }
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j + 1] = 1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i - 1][j + 1] = -1;
+						 visited[i - 1][j + 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j + 1] = -1;
+						 visited[i + 1][j - 1] = 1;
+						 Current_board[i - 1][j + 1] = 1;
+						 visited[i - 1][j + 1] = 1;
+					 }
+				 }
+				 if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i][j + 1] = 1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i + 1][j] = -1;
+						 visited[i + 1][j] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i][j + 1] = -1;
+						 visited[i][j + 1] = 1;
+						 Current_board[i + 1][j] = 1;
+						 visited[i + 1][j] = 1;
+					 }
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
+				 {
+					 int random_number = (rand() % 2) + 0;
+					 if (random_number == 0)
+					 {
+						 Current_board[i - 1][j + 1] = 1;
+						 visited[i - 1][j + 1] = 1;
+						 Current_board[i][j - 1] = -1;
+						 visited[i][j - 1] = 1;
+					 }
+					 else
+					 {
+						 Current_board[i - 1][j + 1] = -1;
+						 visited[i - 1][j + 1] = 1;
+						 Current_board[i][j - 1] = 1;
+						 visited[i][j - 1] = 1;
+					 }
+				 }
+				 
+				 
+				 //我方无用位置1
+				 
+				 
+				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 1] == 0)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j + 1);
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 1][j] == 0)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i][j - 2] == 1 && Current_board[i][j - 1] == 0)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 1][j] == 0)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 2] == 1 && Current_board[i][j + 1] == 0)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j + 1);
+				 }
+				 
+				 
+				 //我方无用位置2
+				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 2] == -1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j + 1);
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 2][j + 1] == -1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1 && Current_board[i - 1][j - 1] == -1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 2] == -1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 2][j - 1] == -1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1 && Current_board[i + 1][j + 1] == -1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j + 1);
+				 }
+				 
+				 
+				 //公共无用位置
+				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j + 1);
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j);
+				 }
+				 if (j - 2 >= 0 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j);
+				 }
+				 if (j + 2 <= 10 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j + 1);
+				 }
+				 
+				 
+				 //对方无用位置1
+				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 1] == 0)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j + 1);
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 1][j] == 0)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i][j - 2] == -1 && Current_board[i][j - 1] == 0)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i][j - 1] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 1] == 0)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 1][j] == 0)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 2] == -1 && Current_board[i][j + 1] == 0)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j + 1);
+				 }
+				 
+				 
+				 //对方无用位置2
+				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 2] == 1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j + 1);
+				 }
+				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 2][j + 1] == 1)
+				 {
+					 useless_nodes_x.push(i - 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 2] == 1 && Current_board[i - 1][j - 1] == 1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 2] == 1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j - 1);
+				 }
+				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 2][j - 1] == 1)
+				 {
+					 useless_nodes_x.push(i + 1);
+					 useless_node_y.push(j);
+				 }
+				 if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 2] == 1 && Current_board[i + 1][j + 1] == 1)
+				 {
+					 useless_nodes_x.push(i);
+					 useless_node_y.push(j + 1);
+				 }
+				 
+				 while (useless_nodes_x.size() >= 2)				//随机落子
+				 {
+					 int x = useless_nodes_x.top();
+					 int y = useless_node_y.top();
+					 Current_board[x][y] = 1;
+					 visited[x][y] = 1;
+					 useless_nodes_x.pop();
+					 useless_node_y.pop();
+					 
+					 x = useless_nodes_x.top();
+					 y = useless_node_y.top();
+					 Current_board[x][y] = -1;
+					 visited[x][y] = 1;
+					 useless_nodes_x.pop();
+					 useless_node_y.pop();
+				 }
+				 if(!useless_nodes_x.size())
+				 {
+					int x = useless_nodes_x.top();
+					int y = useless_node_y.top();
+					Current_board[x][y] = 1;
+					visited[x][y] = 1;
+					useless_nodes_x.pop();
+					useless_node_y.pop();
+				 }
+				 
+				 visited[i][j] = 1;
+			 }
+		 }
+	 }
+ }
+ 
+ void visited_reset()
+ {
+	 for (int i = 0; i < 11; i++)
+	 {
+		 for (int j = 0; j < 11; j++)
+		 {
+			 visited[i][j] = 0;
+		 }
+	 }
+ }
+
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+int main()
+{
+	int x, y, n;
+	//恢复目前的棋盘信息
+	cin >> n;
+	for (int i = 0; i < n - 1; i++) {
+		cin >> x >> y; if (x != -1) iniboard[x][y] = -1;	//对方
+		cin >> x >> y; if (x != -1) iniboard[x][y] = 1;	//我方
+	}
+	cin >> x >> y;
+	if (x != -1) iniboard[x][y] = -1;	//对方
+	
+	//此时board[][]里存储的就是当前棋盘的所有棋子信息,x和y存的是对方最近一步下的棋
+	
+
+	else{
+		printf("1 2");
+		return 0;
+	}
+	
+	memcpy(Current_board, iniboard, 121 * sizeof(int));      //复制棋盘
+	//判断桥是否被破坏（补充）
+	
+	
+//	fill_board();                                         //填充无用位置
+	union_find();     									  //重置用的并查集初始化
+/*	if(is_win()){
+		//返回输出(补充）
+		
+		return 0;
+	}
+ */
+	
+	
+	
+	MCTNode* bestchoice = nullptr;
+	bestchoice=bestchoice->monteCarloTreeSearch( x, y);
+	bestchoice->Result_Output();
+	
+
+	
+	
+	
+	
+	
+	
+	
+	// 向平台输出决策结果
+//	cout << new_x << ' ' << new_y << endl;
+	return 0;
+}

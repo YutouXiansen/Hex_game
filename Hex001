@@ -1226,7 +1226,7 @@ xgznode** toget_twodis(int mycolor, int color)
 	 struct xgznode** better_choice = toget_twodis(mycolor,color);
 	 MCTNode* new_node;
 	 
-	 for (int k = xgznode_num-1 ; k >= 0; k++) {
+	 for (int k = xgznode_num-1 ; k >= 0; k--) {
 		 
 		 new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
 		 node->child.emplace_back(new_node);

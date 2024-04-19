@@ -168,9 +168,9 @@ int** myred_twodis_bule_to_A0() // red = 1    blue = -1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -237,9 +237,9 @@ int** myred_twodis_bule_to_A10()  // red = 1    blue = -1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -306,9 +306,9 @@ int** myred_twodis_red_to_A0() // red = 1    blue = -1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -375,9 +375,9 @@ int** myred_twodis_red_to_A10()  // red = 1    blue = -1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -445,9 +445,9 @@ int** mybule_twodis_bule_to_A0() // red = -1    blue = 1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -515,9 +515,9 @@ int** mybule_twodis_bule_to_A10()  // red = -1    blue = 1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -581,13 +581,13 @@ int** mybule_twodis_red_to_A0() // red = -1    blue = 1
 		board1[i][12] = 1;
 	}
 	int** dis = new int* [RealSIZE];
-	for (int i = 1; i <= 11; i++)
+	for (int i = 0; i <= RealSIZE; i++)
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)
@@ -654,9 +654,9 @@ int** mybule_twodis_red_to_A10()  // red = -1    blue = 1
 	{
 		dis[i] = new int[RealSIZE];
 	}
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < RealSIZE; i++)
 	{
-		for (int j = 0; j < 13; j++)
+		for (int j = 0; j < RealSIZE; j++)
 			dis[i][j] = 128;
 	}
 	for (int i = 1; i <= 11; i++)

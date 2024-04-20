@@ -1182,112 +1182,7 @@ xgznode** toget_twodis(int mycolor, int color)
  
  
 
- //判断深度
- int MCTNode::isTerminal(){
-	 int depth=0;
-	 MCTNode* ptr = this;
-	 while(ptr->parent!=nullptr){
-		 depth++;
-		 ptr=ptr->parent;
-	 }
-	 if(depth<=6){
-		 return 0;
-	 }
-	 else{
-		 return 1;
-	 }
- }
  
- //输出结果
- void MCTNode::Result_Output(){
-    printf("%d %d",this->x,this->y);
- }
- 
- MCTNode::MCTNode(MCTNode* parent, int x, int y)
- {
-	 this->parent = parent;
-	 this->score = 0;
-	 this->search_time = 0;
-	 this->x = x, this->y = y;
- }
- 
- double MCTNode::UCT()
- {
-	 return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
- }
- 
- MCTNode* MCTNode::expand(MCTNode* node) {
-	 //双距离选点
-	 int mycolor = who_first();
-	 struct xgznode** better_choice = toget_twodis(mycolor,color);
-	 MCTNode* new_node;
-	 
-	 for (int k = xgznode_num-1 ; k >= 0; k--) {
-		 
-		 new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
-		 node->child.emplace_back(new_node);
-	 }
-	 return new_node;
- }
- 
- MCTNode* MCTNode::select(MCTNode* node)
- {
-	 color = 1;
-	 while (node->isTerminal()== 0 ) {
-		 if (!node->child.empty()) {
-			 node = node->bestChild(node);
-		 }
-		 else {
-			 node = node->expand(node);
-			 //				return sub_node;
-		 }
-		 
-		 //补充并查集
-		 union_find_update(node->x, node->y,color);
-		 //补充棋盘
-		 Current_board[node->x][node->y] = color;
-		 color = -color;
-		 
-	 }
- 
-	 return node;
-	 
- }
- //达到层数后随机落点
- int MCTNode::simulate() {
-	 vector<randomnode> fillend;
-	 randomnode ran;
-	 for(int i=0;i<11;i++){
-		 for(int j=0;j<11;j++){
-			if( Current_board[i][j] == 0 ){
-				ran.x=i,ran.y=j;
-				fillend.emplace_back(ran);
-			}
-		 }
-	 }
-	 for(int k=0;k<(int)fillend.size();k++){
-	    random_shuffle(fillend.begin(), fillend.end()-k);
-		fillend[0].whatcolor=color;
-		Current_board[fillend[0].x][fillend[0].y]=fillend[0].whatcolor;
-		union_find_update(fillend[0].x,fillend[0].y,fillend[0].whatcolor);
-		color=-color;
-		if( is_win() !=0 ){
-			return is_win();
-		}
-		swap(fillend[0],fillend[(int)fillend.size()-k]);
-	 }
-	 return is_win();
- }
- 
- void MCTNode::backup(MCTNode* node, int reward) {
-	 while (node != nullptr) {
-		 if(Current_board[node->x][node->y]==reward){
-		    node->win_time+=reward;
-		 }
-		 node->search_time++;
-		 node = node->parent;
-	 }
- }
  int is_win()				//我方赢了返回1，对方赢了返回-1，未结束返回0
  {
 	 if (Current_board[1][2] == 1)			//我方先手
@@ -2126,70 +2021,7 @@ xgznode** toget_twodis(int mycolor, int color)
 		 return final_father;
 	 }
  }
- 
- MCTNode* MCTNode::bestChild(MCTNode* node) 
- {
-	 int UCT_number = 0;
-	 MCTNode* best = NULL;
-	 vector<MCTNode*>::iterator p = node->child.begin();
-	 for (; p != node->child.end(); p++)
-	 {
-		 if ((*p)->search_time == 0)
-			 return (*p);
-		 else if (UCT_number < (*p)->UCT())
-			 best = (*p);
-	 }
-	 return best;
- }
- 
- //谁先下
- int who_first(){
-	 if(board[1][2]==-1){
-		 return 0;//对面先下
-	 }
-	 else{
-		 return 1;//我们先下
-	 }
- }
- 
- MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
 
-	 MCTNode* bestchoice;
-	 MCTNode* root = new MCTNode(nullptr, x, y);
-	 memcpy(board,Current_board,121 * sizeof(int));        //蒙特卡洛重置用的board初始化
-	 
-	 
-	 //卡秒退
-	 int threshold = 0.8 * (double)CLOCKS_PER_SEC; //CLOCKS_PER_SEC 和 clock()的含义可百度
-	 int start_time, current_time;
-	 start_time = current_time = clock();
-	 while (current_time-start_time < threshold){ //到 0.8 秒立即跳出循环
-		 
-		 visited_reset();
-		 union_board_reset();                                  //变化并查集初始化
-		 memcpy(Current_board,board,121*sizeof(int));
-		 MCTNode* expand_node = root->select(root);
-		 int reward = expand_node->simulate();
-		 backup(expand_node, reward);
-		 
-		 current_time = clock();
-	 }
-	 	
-	double final = -1;
-	for(int i = 0; i < (int)root -> child.size(); i++)
-	{
-		double node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
-		if( final < node_score)
-		{
-			final = node_score;
-			bestchoice=root->child[i];
-		}
-	}
-
-	 
-	 return bestchoice;
- }
- 
  void fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
  {
 	int now_color = 1;
@@ -3023,6 +2855,180 @@ int protect(int x, int y)
 	}
 	return 1;
 } 
+
+
+
+
+ //判断深度
+ int MCTNode::isTerminal(){
+	 int depth=0;
+	 MCTNode* ptr = this;
+	 while(ptr->parent!=nullptr){
+		 depth++;
+		 ptr=ptr->parent;
+	 }
+	 if(depth<=6){
+		 return 0;
+	 }
+	 else{
+		 return 1;
+	 }
+ }
+ 
+ //输出结果
+ void MCTNode::Result_Output(){
+    printf("%d %d",this->x,this->y);
+ }
+ 
+ MCTNode::MCTNode(MCTNode* parent, int x, int y)
+ {
+	 this->parent = parent;
+	 this->score = 0;
+	 this->search_time = 0;
+	 this->x = x, this->y = y;
+ }
+ 
+ double MCTNode::UCT()
+ {
+	 return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
+ }
+ 
+ MCTNode* MCTNode::expand(MCTNode* node) {
+	 //双距离选点
+	 int mycolor = who_first();
+	 struct xgznode** better_choice = toget_twodis(mycolor,color);
+	 MCTNode* new_node;
+	 
+	 for (int k = xgznode_num-1 ; k >= 0; k--) {
+		 
+		 new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
+		 node->child.emplace_back(new_node);
+	 }
+	 return new_node;
+ }
+ 
+ MCTNode* MCTNode::select(MCTNode* node)
+ {
+	 color = 1;
+	 while (node->isTerminal()== 0 ) {
+		 if (!node->child.empty()) {
+			 node = node->bestChild(node);
+		 }
+		 else {
+			 node = node->expand(node);
+			 //				return sub_node;
+		 }
+		 
+		 //补充并查集
+		 union_find_update(node->x, node->y,color);
+		 //补充棋盘
+		 Current_board[node->x][node->y] = color;
+		 color = -color;
+		 
+	 }
+ 
+	 return node;
+	 
+ }
+ //达到层数后随机落点
+int MCTNode::simulate() {
+	int randomnode[121];
+	for(int i=0;i<121;i++){
+		randomnode[i] = i;
+	}
+	
+	srand ( unsigned ( time(0) ) );
+	random_shuffle(randomnode,randomnode+121);
+	
+	for(int i=0;i<121;i++){	
+		int x,y;
+		x=i/11,y=i%11;
+		if(Current_board[x][y] == 0){
+			Current_board[x][y]=color;
+			union_find_update(x,y,color);
+			color=-color;
+			if( is_win() != 0){
+				return is_win();
+			}
+		}
+	}
+	
+	return is_win();
+}
+ 
+ void MCTNode::backup(MCTNode* node, int reward) {
+	 while (node != nullptr) {
+		 if(Current_board[node->x][node->y]==reward){
+		    node->win_time+=reward;
+		 }
+		 node->search_time++;
+		 node = node->parent;
+	 }
+ }
+ MCTNode* MCTNode::bestChild(MCTNode* node) 
+ {
+	 int UCT_number = 0;
+	 MCTNode* best = NULL;
+	 vector<MCTNode*>::iterator p = node->child.begin();
+	 for (; p != node->child.end(); p++)
+	 {
+		 if ((*p)->search_time == 0)
+			 return (*p);
+		 else if (UCT_number < (*p)->UCT())
+			 best = (*p);
+	 }
+	 return best;
+ }
+ 
+ //谁先下
+ int who_first(){
+	 if(board[1][2]==-1){
+		 return 0;//对面先下
+	 }
+	 else{
+		 return 1;//我们先下
+	 }
+ }
+ 
+ MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
+
+	 MCTNode* bestchoice;
+	 MCTNode* root = new MCTNode(nullptr, x, y);
+	 memcpy(board,Current_board,121 * sizeof(int));        //蒙特卡洛重置用的board初始化
+	 
+	 
+	 //卡秒退
+	 int threshold = 0.8 * (double)CLOCKS_PER_SEC; //CLOCKS_PER_SEC 和 clock()的含义可百度
+	 int start_time, current_time;
+	 start_time = current_time = clock();
+	 while (current_time-start_time < threshold){ //到 0.8 秒立即跳出循环
+		 
+		 visited_reset();
+		 union_board_reset();                                  //变化并查集初始化
+		 memcpy(Current_board,board,121*sizeof(int));
+		 MCTNode* expand_node = root->select(root);
+		 int reward = expand_node->simulate();
+		 backup(expand_node, reward);
+		 
+		 current_time = clock();
+	 }
+	 	
+	double final = -1;
+	for(int i = 0; i < (int)root -> child.size(); i++)
+	{
+		double node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
+		if( final < node_score)
+		{
+			final = node_score;
+			bestchoice=root->child[i];
+		}
+	}
+
+	 
+	 return bestchoice;
+ }
+ 
+
  
  
  

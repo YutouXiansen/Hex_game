@@ -1796,7 +1796,7 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 }
 Union_node* union_find_father(int x, int y)			//寻找并查集根结点
 {
-	if(x != -1 && y != -1)
+	if(x != -1 && y != -1 && x != 11 && y != 11)
 	{
 		if (Current_union[x][y].father_x == x && Current_union[x][y].father_y == y)				//根结点是自己，直接返回
 			return &Current_union[x][y];
@@ -1865,7 +1865,7 @@ Union_node* union_find_father(int x, int y)			//寻找并查集根结点
 
 Union_node* union_find_father_first(int x, int y)			//寻找并查集根结点
 {
-	if(x != -1 && y != -1)
+	if(x != -1 && y != -1 && x != 11 && y != 11)
 	{
 		if (union_board[x][y].father_x == x && union_board[x][y].father_y == y)				//根结点是自己，直接返回
 			return &union_board[x][y];

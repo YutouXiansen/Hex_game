@@ -2955,7 +2955,7 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 
 Union_node* union_find_father(Union_node* son)			//寻找并查集根结点
 {
-	if (son->father = son)				//根结点是自己，直接返回
+	if (son->father == son)				//根结点是自己，直接返回
 		return son;
 	else				//根结点不是自己，获取后更新
 	{
@@ -2968,7 +2968,7 @@ Union_node* union_find_father(Union_node* son)			//寻找并查集根结点
 
 Union_node* union_find_father_first(Union_node* son)			//寻找并查集根结点
 {
-	if (son->father = son)				//根结点是自己，直接返回
+	if (son->father == son)				//根结点是自己，直接返回
 		return son;
 	else				//根结点不是自己，获取后更新
 	{

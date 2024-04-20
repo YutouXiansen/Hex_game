@@ -2575,6 +2575,8 @@ void union_find()			//棋盘并查集初始化
 			for (int j = 0; j < 11; j++)
 			{
 				union_board[i][j].father = &union_board[i][j];
+				union_board[i][j].x = i;
+				union_board[i][j].y = j;
 			}
 		}
 		for (int i = 0; i < 11; i++)

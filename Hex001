@@ -32,6 +32,7 @@ struct Union_node Current_union[11][11];			//并查集
 struct Union_node union_board[11][11];
 struct Union_node boundary[4] = { {NULL},{NULL},{NULL},{NULL} };						//并查集的四个边界   红方1，蓝方1，红方2，蓝方2
 struct Union_node Current_boundary[4] = { {NULL},{NULL},{NULL},{NULL} };
+stack<int> useless_nodes_x, useless_node_y;
 class MCTNode
 {
 private:

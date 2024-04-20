@@ -2181,7 +2181,7 @@ xgznode** toget_twodis(int mycolor, int color)
 	double final = -1;
 	for(int i = 0; i < (int)root -> child.size(); i++)
 	{
-		int node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
+		double node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
 		if( final < node_score)
 		{
 			final = node_score;

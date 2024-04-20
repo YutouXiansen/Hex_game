@@ -1455,8 +1455,6 @@ xgznode** toget_twodis(int mycolor, int color)
 		x_y[4][1] = 5;
 		x_y[5][0] = 5;
 		x_y[5][1] = 4;
-		x_y[6][0] = 5;
-		x_y[6][1] = 7;
 		min0 = min1 = min2 = min3 = min4 = min5 = inf;
 		for (int i = 0; i < 11; i++)
 		{
@@ -1654,6 +1652,18 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			x_y[i] = new int[2];
 		}
+		x_y[0][0] = 5;
+		x_y[0][1] = 5;
+		x_y[1][0] = 5;
+		x_y[1][1] = 6;
+		x_y[2][0] = 6;
+		x_y[2][1] = 6;
+		x_y[3][0] = 6;
+		x_y[3][1] = 7;
+		x_y[4][0] = 4;
+		x_y[4][1] = 5;
+		x_y[5][0] = 5;
+		x_y[5][1] = 4;
 		min0 = min1 = min2 = min3 = min4 = min5 = 10000;
 		for (int i = 0; i < 11; i++)
 		{

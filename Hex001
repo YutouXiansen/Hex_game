@@ -27,6 +27,8 @@ int who_first();			//谁先手,先下返回1,后下返回0
 struct Union_node
 {
 	struct Union_node* father;
+	int x;
+	int y;
 };
 struct Union_node Current_union[11][11];			//并查集
 struct Union_node union_board[11][11];
@@ -2699,23 +2701,59 @@ void union_find()			//棋盘并查集初始化
 	{
 		for (int j = 0; j < 11; j++)
 		{
-			Current_union[i][j].father = union_board[i][j].father;
+			struct Union_node* vir_father = union_find_father_first(&union_board[i][j]);
+			if(vir_father->x != -1)
+			{
+				Current_union[i][j].father = &Current_union[vir_father->x][vir_father->y];
+			}
+			else
+			{
+				Current_union[i][j].father = &Current_boundary[vir_father->y];
+			}
+		}
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		struct Union_node* vir_father = union_find_father_first(&boundary[i]);
+		if (vir_father->x != -1)
+		{
+			Current_boundary[i].father = &Current_union[vir_father->x][vir_father->y];
+		}
+		else
+		{
+			Current_boundary[i].father = &Current_boundary[vir_father->y];
 		}
 	}
 }
 
 void union_board_reset()
 {
-	for (int i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 	{
 		for (int j = 0; j < 11; j++)
 		{
-			Current_union[i][j].father = union_board[i][j].father;
+			struct Union_node* vir_father = union_find_father_first(&union_board[i][j]);
+			if (vir_father->x != -1)
+			{
+				Current_union[i][j].father = &Current_union[vir_father->x][vir_father->y];
+			}
+			else
+			{
+				Current_union[i][j].father = &Current_boundary[vir_father->y];
+			}
 		}
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		Current_boundary[i].father = boundary[i].father;
+		struct Union_node* vir_father = union_find_father_first(&boundary[i]);
+		if (vir_father->x != -1)
+		{
+			Current_boundary[i].father = &Current_union[vir_father->x][vir_father->y];
+		}
+		else
+		{
+			Current_boundary[i].father = &Current_boundary[vir_father->y];
+		}
 	}
 }
 

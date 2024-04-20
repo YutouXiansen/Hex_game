@@ -1842,7 +1842,7 @@ Union_node* union_find_father(int x, int y)			//寻找并查集根结点
 		else
 		{
 			struct Union_node* final_father;
-			final_father = union_find_father(Current_boundary[0].father_x, Current_boundary[2].father_y);
+			final_father = union_find_father(Current_boundary[2].father_x, Current_boundary[2].father_y);
 			Current_boundary[2].father_x = final_father->father_x;
 			Current_boundary[2].father_y = final_father->father_y;
 			return final_father;
@@ -1911,7 +1911,7 @@ Union_node* union_find_father_first(int x, int y)			//寻找并查集根结点
 		else
 		{
 			struct Union_node* final_father;
-			final_father = union_find_father(boundary[0].father_x, boundary[2].father_y);
+			final_father = union_find_father(boundary[2].father_x, boundary[2].father_y);
 			boundary[2].father_x = final_father->father_x;
 			boundary[2].father_y = final_father->father_y;
 			return final_father;

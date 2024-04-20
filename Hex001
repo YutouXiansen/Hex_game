@@ -81,6 +81,8 @@ struct xgznode
 	int i;
 	int j;
 	int distance;
+	int firdistance;
+	int sedistance;
 };
 
 bool  operator > (xgznode a, xgznode b)

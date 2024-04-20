@@ -14,12 +14,12 @@
 using namespace std;
 
 
- //声明全局变量,函数
- const int SIZE = 11;
- int iniboard[SIZE][SIZE] = { 0 };//本方1，对方-1，空白0
- int board[SIZE][SIZE] ={ 0 };
-int Current_board[11][11]={0};			//当前棋局                                     
-int color,round0; 
+//声明全局变量,函数
+const int SIZE = 11;
+int iniboard[SIZE][SIZE] = { 0 };//本方1，对方-1，空白0
+int board[SIZE][SIZE] = { 0 };
+int Current_board[11][11] = { 0 };			//当前棋局                                     
+int color, round0;
 int visited[11][11] = { 0 };
 int who_first();			//谁先手,先下返回1,后下返回0
 
@@ -36,15 +36,15 @@ stack<int> useless_nodes_x, useless_node_y;
 class MCTNode
 {
 private:
-	int x,y;
+	int x, y;
 	vector<MCTNode*> child;			//子节点集合
 	MCTNode* parent;			//父节点，加减分用
 	int score;				//分数
 	int search_time;			//搜索次数
 	int win_time;			//胜利次数
-//	int children_search_time;			//所有子节点搜索次数
+	//	int children_search_time;			//所有子节点搜索次数
 public:
-	MCTNode(MCTNode* parent,int x,int y);
+	MCTNode(MCTNode* parent, int x, int y);
 	//选择子节点，返回值为MCTNode*类型
 	MCTNode* select(MCTNode* node);
 	//拓展该节点，返回值为空
@@ -62,11 +62,11 @@ public:
 	//选择最好子节点
 	MCTNode* bestChild(MCTNode* node);
 	//全过程
-	MCTNode* monteCarloTreeSearch(int x,int y); 
+	MCTNode* monteCarloTreeSearch(int x, int y);
 	void Result_Output();
-	
+
 };
-struct randomnode{
+struct randomnode {
 	int x;
 	int y;
 	int whatcolor;
@@ -164,10 +164,10 @@ xgznode*** myred_twodis_bule_to_A0() // red = 1    blue = -1
 		board1[i][0] = -1;
 		board1[i][12] = -1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -246,10 +246,10 @@ xgznode*** myred_twodis_bule_to_A10()  // red = 1    blue = -1
 		board1[i][0] = -1;
 		board1[i][12] = -1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -277,7 +277,7 @@ xgznode*** myred_twodis_bule_to_A10()  // red = 1    blue = -1
 		}
 		else
 		{
-			dis[i][11]->distance = inf; 
+			dis[i][11]->distance = inf;
 			dis[i][11]->firdistance = inf;
 			dis[i][11]->sedistance = inf;
 		}
@@ -328,10 +328,10 @@ xgznode*** myred_twodis_red_to_A0() // red = 1    blue = -1
 		board1[i][0] = -1;
 		board1[i][12] = -1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -409,10 +409,10 @@ xgznode*** myred_twodis_red_to_A10()  // red = 1    blue = -1
 		board1[i][0] = -1;
 		board1[i][12] = -1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -490,10 +490,10 @@ xgznode*** mybule_twodis_bule_to_A0() // red = -1    blue = 1
 		board1[i][0] = 1;
 		board1[i][12] = 1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -571,10 +571,10 @@ xgznode*** mybule_twodis_bule_to_A10()  // red = -1    blue = 1
 		board1[i][0] = 1;
 		board1[i][12] = 1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -658,10 +658,10 @@ xgznode*** mybule_twodis_red_to_A0() // red = -1    blue = 1
 	//int firsttime, setime;
 	//firsttime = setime = clock();
 
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -756,10 +756,10 @@ xgznode*** mybule_twodis_red_to_A10()  // red = -1    blue = 1
 		board1[i][0] = 1;
 		board1[i][12] = 1;
 	}
-	xgznode*** dis = new xgznode** [RealSIZE];
+	xgznode*** dis = new xgznode * *[RealSIZE];
 	for (int i = 0; i < RealSIZE; i++)
 	{
-		dis[i] = new xgznode*[RealSIZE];
+		dis[i] = new xgznode * [RealSIZE];
 	}
 	for (int i = 0; i < RealSIZE; i++)
 	{
@@ -1052,7 +1052,7 @@ void findseconddis(int i, int j, int flag, xgznode*** dis)
 	}
 	for (int k = 2; k < (int)aim.size(); k++)
 	{
-	if (*min1 > *aim[k])
+		if (*min1 > *aim[k])
 		{
 			min2 = min1;
 			min1 = aim[k];
@@ -1296,7 +1296,7 @@ void findseconddis(int i, int j, int flag, xgznode*** dis)
 				dis[aim[k]->i][aim[k]->j]->sedistance = dis[aim[k]->i][aim[k]->j]->firdistance;
 				dis[aim[k]->i][aim[k]->j]->firdistance = dis[i][j]->distance;
 				dis[aim[k]->i][aim[k]->j]->distance = dis[aim[k]->i][aim[k]->j]->sedistance + 1;
-				
+
 				if (dis[aim[k]->i][aim[k]->j]->distance > 128)
 				{
 					dis[aim[k]->i][aim[k]->j]->distance = 128;
@@ -1310,7 +1310,7 @@ void findseconddis(int i, int j, int flag, xgznode*** dis)
 			{
 				dis[aim[k]->i][aim[k]->j]->sedistance = dis[i][j]->distance;
 				dis[aim[k]->i][aim[k]->j]->distance = dis[aim[k]->i][aim[k]->j]->sedistance + 1;
-				
+
 				if (dis[aim[k]->i][aim[k]->j]->distance > 128)
 				{
 					dis[aim[k]->i][aim[k]->j]->distance = 128;
@@ -1409,7 +1409,7 @@ xgznode** toget_twodis(int mycolor, int color)
 					xgznode*** new_my_red_twodis_bule = new xgznode * *[13];
 					for (int n = 0; n < 13; n++)
 					{
-						new_my_red_twodis_bule[n] = new xgznode* [13];
+						new_my_red_twodis_bule[n] = new xgznode * [13];
 					}
 					for (int n = 0; n < 13; n++)
 					{
@@ -1435,7 +1435,7 @@ xgznode** toget_twodis(int mycolor, int color)
 				}
 			}
 		}
-		int min0,min1, min2, min3, min4, min5;
+		int min0, min1, min2, min3, min4, min5;
 		int** x_y = new int* [6];
 		for (int i = 0; i < 6; i++)
 		{
@@ -1539,7 +1539,7 @@ xgznode** toget_twodis(int mycolor, int color)
 				{
 					x_y[5][0] = i;
 					x_y[5][1] = j;
-					min5 =  newpot[i][j];
+					min5 = newpot[i][j];
 				}
 			}
 		}
@@ -1564,7 +1564,7 @@ xgznode** toget_twodis(int mycolor, int color)
 		{
 			newpot[i] = new int[13];
 		}
-		
+
 		for (int i = 0; i < 11; i++)
 		{
 			for (int j = 0; j < 11; j++)
@@ -1594,18 +1594,18 @@ xgznode** toget_twodis(int mycolor, int color)
 							new_my_bule_twodis_red[n][m]->i = new_my_bule_twodis_red_one[n][m]->i;
 							new_my_bule_twodis_red[n][m]->i = new_my_bule_twodis_red_one[n][m]->i;
 							new_my_bule_twodis_red[n][m]->distance = new_my_bule_twodis_red_one[n][m]->distance + new_my_bule_twodis_red_two[n][m]->distance;
-							
-							cout << new_my_bule_twodis_red[n][m]->distance << ' ';
+
+//							cout << new_my_bule_twodis_red[n][m]->distance << ' ';
 
 						}
 
-						cout << endl;
+//						cout << endl;
 
 					}
-					xgznode*** new_my_bule_twodis_bule = new xgznode**[13];
+					xgznode*** new_my_bule_twodis_bule = new xgznode * *[13];
 					for (int n = 0; n < 13; n++)
 					{
-						new_my_bule_twodis_bule[n] = new xgznode* [13];
+						new_my_bule_twodis_bule[n] = new xgznode * [13];
 					}
 					for (int n = 0; n < 13; n++)
 					{
@@ -1622,11 +1622,11 @@ xgznode** toget_twodis(int mycolor, int color)
 							new_my_bule_twodis_bule[n][m]->i = new_my_bule_twodis_bule_one[n][m]->i;
 							new_my_bule_twodis_bule[n][m]->distance = new_my_bule_twodis_bule_one[n][m]->distance + new_my_bule_twodis_bule_two[n][m]->distance;
 
-							cout << new_my_bule_twodis_bule[n][m]->distance << ' ';
+//							cout << new_my_bule_twodis_bule[n][m]->distance << ' ';
 
 						}
 
-						cout << endl;
+//						cout << endl;
 
 					}
 					newpot[i][j] = getpot(new_my_bule_twodis_red, new_my_bule_twodis_bule);
@@ -1642,9 +1642,9 @@ xgznode** toget_twodis(int mycolor, int color)
 			for (int j = 0; j < 11; j++)
 			{
 				newpot[i][j] = 10000 - newpot[i][j];
-				cout << newpot[i][j] << ' ';
+//				cout << newpot[i][j] << ' ';
 			}
-			cout << endl;
+//			cout << endl;
 		}
 		int min0, min1, min2, min3, min4, min5;
 		int** x_y = new int* [6];
@@ -1746,20 +1746,20 @@ xgznode** toget_twodis(int mycolor, int color)
 			aim[i] = new xgznode;
 			aim[i]->i = x_y[i][0];
 			aim[i]->j = x_y[i][1];
-//			cout << aim[i]->i << ' ' << aim[i]->j << endl;
+			//			cout << aim[i]->i << ' ' << aim[i]->j << endl;
 		}
 		return aim;
 	}
-	
+
 }
 
 
-xgznode*** get_newtwodis(int color, int i, int j,xgznode*** dis)
+xgznode*** get_newtwodis(int color, int i, int j, xgznode*** dis)
 {
-	xgznode*** newdis = new xgznode** [13];
+	xgznode*** newdis = new xgznode * *[13];
 	for (int n = 0; n < 13; n++)
 	{
-		newdis[n] = new xgznode*[13];
+		newdis[n] = new xgznode * [13];
 	}
 	for (int n = 0; n < 13; n++)
 	{
@@ -1779,17 +1779,17 @@ xgznode*** get_newtwodis(int color, int i, int j,xgznode*** dis)
 			newdis[n][m]->sedistance = dis[n][m]->sedistance;
 
 
-			cout << dis[n][m]->distance << ' ';
+//			cout << dis[n][m]->distance << ' ';
 
 
 		}
 
-		cout << endl;
+//		cout << endl;
 
 	}
 
 
-	cout << endl;
+//	cout << endl;
 
 	int flag = color;
 	vector <xgznode*> aim;
@@ -2350,7 +2350,7 @@ xgznode*** get_newtwodis(int color, int i, int j,xgznode*** dis)
 }
 
 
-int getpot(xgznode*** reddis,xgznode*** buledis)// red - bule 
+int getpot(xgznode*** reddis, xgznode*** buledis)// red - bule 
 {
 	for (int i = 0; i < 11; i++)
 	{
@@ -2408,10 +2408,10 @@ int getpot(xgznode*** reddis,xgznode*** buledis)// red - bule
 
 
 
- 
- 
 
- 
+
+
+
 int is_win()				//我方赢了返回1，对方赢了返回-1，未结束返回0
 {
 	if (Current_board[1][2] == 1)			//我方先手
@@ -2630,7 +2630,7 @@ void union_find()			//棋盘并查集初始化
 						p->father = q->father;
 					}
 				}
-			}	
+			}
 		}
 		for (int j = 0; j < 11; j++)
 		{
@@ -2955,430 +2955,430 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 
 Union_node* union_find_father(Union_node* son)			//寻找并查集根结点
 {
-		if (son->father = son)				//根结点是自己，直接返回
-			return son;
-		else				//根结点不是自己，获取后更新
-		{
-			struct Union_node* final_father;
-			final_father = union_find_father(son->father);
-			son->father = final_father;
-			return final_father;
-		}
+	if (son->father = son)				//根结点是自己，直接返回
+		return son;
+	else				//根结点不是自己，获取后更新
+	{
+		struct Union_node* final_father;
+		final_father = union_find_father(son->father);
+		son->father = final_father;
+		return final_father;
+	}
 }
 
 Union_node* union_find_father_first(Union_node* son)			//寻找并查集根结点
 {
-		if (son->father = son)				//根结点是自己，直接返回
-			return son;
-		else				//根结点不是自己，获取后更新
-		{
-			struct Union_node* final_father;
-			final_father = union_find_father_first(son->father);
-			son->father = final_father;
-			return final_father;
-		}
+	if (son->father = son)				//根结点是自己，直接返回
+		return son;
+	else				//根结点不是自己，获取后更新
+	{
+		struct Union_node* final_father;
+		final_father = union_find_father_first(son->father);
+		son->father = final_father;
+		return final_father;
+	}
 }
 
- void fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
- {
+void fill_board()				//只填充桥，无用位置和被捕获位置，|||||同时获取脆弱的桥的信息，以攻击或防守，||||||同时获取被侵入的边界的信息，以防守
+{
 	int now_color = 1;
-	 for(int i = 0; i < 11; i++)
-	 {
-		 for (int j = 0; j < 11; j++)
-		 {
-			 if(visited[i][j] == 0)			//该点不是自己填的
-			 {
-				 //我方六个桥||||||else里是脆弱的桥
-				 
-				 
-				 if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i - 1][j] = 1;
-						 visited[i - 1][j] = 1;
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i - 1][j] = -1;
-						 visited[i - 1][j] = 1;
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-						 Current_board[i + 1][j - 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-						 Current_board[i + 1][j - 1] = 1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i + 1][j] = 1;
-						 visited[i + 1][j] = 1;
-						 Current_board[i + 1][j - 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i + 1][j] = -1;
-						 visited[i + 1][j] = 1;
-						 Current_board[i + 1][j - 1] = 1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j + 1] = 1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i - 1][j + 1] = -1;
-						 visited[i - 1][j + 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j + 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-						 Current_board[i - 1][j + 1] = 1;
-						 visited[i - 1][j + 1] = 1;
-					 }
-				 }
-				 if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j + 1] = 1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i + 1][j] = -1;
-						 visited[i + 1][j] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j + 1] = -1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i + 1][j] = 1;
-						 visited[i + 1][j] = 1;
-					 }
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i - 1][j + 1] = 1;
-						 visited[i - 1][j + 1] = 1;
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i - 1][j + 1] = -1;
-						 visited[i - 1][j + 1] = 1;
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-					 }
-				 }
-				 
-				 
-				 //对方六个桥
-				 
-				 
-				 if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i - 1][j] = 1;
-						 visited[i - 1][j] = 1;
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i - 1][j] = -1;
-						 visited[i - 1][j] = 1;
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-						 Current_board[i + 1][j - 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-						 Current_board[i + 1][j - 1] = 1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i + 1][j] = 1;
-						 visited[i + 1][j] = 1;
-						 Current_board[i + 1][j - 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i + 1][j] = -1;
-						 visited[i + 1][j] = 1;
-						 Current_board[i + 1][j - 1] = 1;
-						 visited[i + 1][j - 1] = 1;
-					 }
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j + 1] = 1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i - 1][j + 1] = -1;
-						 visited[i - 1][j + 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j + 1] = -1;
-						 visited[i + 1][j - 1] = 1;
-						 Current_board[i - 1][j + 1] = 1;
-						 visited[i - 1][j + 1] = 1;
-					 }
-				 }
-				 if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i][j + 1] = 1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i + 1][j] = -1;
-						 visited[i + 1][j] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i][j + 1] = -1;
-						 visited[i][j + 1] = 1;
-						 Current_board[i + 1][j] = 1;
-						 visited[i + 1][j] = 1;
-					 }
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
-				 {
-					 int random_number = (rand() % 2) + 0;
-					 if (random_number == 0)
-					 {
-						 Current_board[i - 1][j + 1] = 1;
-						 visited[i - 1][j + 1] = 1;
-						 Current_board[i][j - 1] = -1;
-						 visited[i][j - 1] = 1;
-					 }
-					 else
-					 {
-						 Current_board[i - 1][j + 1] = -1;
-						 visited[i - 1][j + 1] = 1;
-						 Current_board[i][j - 1] = 1;
-						 visited[i][j - 1] = 1;
-					 }
-				 }
-				 
-				 
-				 //我方无用位置1
-				 
-				 
-				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 1] == 0)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j + 1);
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 1][j] == 0)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i][j - 2] == 1 && Current_board[i][j - 1] == 0)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 1][j] == 0)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 2] == 1 && Current_board[i][j + 1] == 0)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j + 1);
-				 }
-				 
-				 
-				 //我方无用位置2
-				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 2] == -1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j + 1);
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 2][j + 1] == -1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1 && Current_board[i - 1][j - 1] == -1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 2] == -1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 2][j - 1] == -1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1 && Current_board[i + 1][j + 1] == -1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j + 1);
-				 }
-				 
-				 
-				 //公共无用位置
-				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j + 1);
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j);
-				 }
-				 if (j - 2 >= 0 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j);
-				 }
-				 if (j + 2 <= 10 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j + 1);
-				 }
-				 
-				 
-				 //对方无用位置1
-				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 1] == 0)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j + 1);
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 1][j] == 0)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i][j - 2] == -1 && Current_board[i][j - 1] == 0)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i][j - 1] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 1] == 0)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 1][j] == 0)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 2] == -1 && Current_board[i][j + 1] == 0)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j + 1);
-				 }
-				 
-				 
-				 //对方无用位置2
-				 if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 2] == 1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j + 1);
-				 }
-				 if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 2][j + 1] == 1)
-				 {
-					 useless_nodes_x.push(i - 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 2] == 1 && Current_board[i - 1][j - 1] == 1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 2] == 1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j - 1);
-				 }
-				 if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 2][j - 1] == 1)
-				 {
-					 useless_nodes_x.push(i + 1);
-					 useless_node_y.push(j);
-				 }
-				 if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 2] == 1 && Current_board[i + 1][j + 1] == 1)
-				 {
-					 useless_nodes_x.push(i);
-					 useless_node_y.push(j + 1);
-				 }
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			if (visited[i][j] == 0)			//该点不是自己填的
+			{
+				//我方六个桥||||||else里是脆弱的桥
+
+
+				if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j] = 1;
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j] = -1;
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] = -1;
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] = 1;
+						visited[i + 1][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i + 1][j] = 1;
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] = -1;
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i + 1][j] = -1;
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] = 1;
+						visited[i + 1][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] = 1;
+						visited[i][j + 1] = 1;
+						Current_board[i - 1][j + 1] = -1;
+						visited[i - 1][j + 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] = -1;
+						visited[i + 1][j - 1] = 1;
+						Current_board[i - 1][j + 1] = 1;
+						visited[i - 1][j + 1] = 1;
+					}
+				}
+				if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] = 1;
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] = -1;
+						visited[i + 1][j] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] = -1;
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] = 1;
+						visited[i + 1][j] = 1;
+					}
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j + 1] = 1;
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j + 1] = -1;
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+					}
+				}
+
+
+				//对方六个桥
+
+
+				if (i - 1 >= 0 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 1][j] == 0 && Current_board[i][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j] = 1;
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j] = -1;
+						visited[i - 1][j] = 1;
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] = -1;
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+						Current_board[i + 1][j - 1] = 1;
+						visited[i + 1][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i + 1][j] = 1;
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] = -1;
+						visited[i + 1][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i + 1][j] = -1;
+						visited[i + 1][j] = 1;
+						Current_board[i + 1][j - 1] = 1;
+						visited[i + 1][j - 1] = 1;
+					}
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] = 1;
+						visited[i][j + 1] = 1;
+						Current_board[i - 1][j + 1] = -1;
+						visited[i - 1][j + 1] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] = -1;
+						visited[i + 1][j - 1] = 1;
+						Current_board[i - 1][j + 1] = 1;
+						visited[i - 1][j + 1] = 1;
+					}
+				}
+				if (i + 1 <= 10 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 1] == 0 && Current_board[i + 1][j] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i][j + 1] = 1;
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] = -1;
+						visited[i + 1][j] = 1;
+					}
+					else
+					{
+						Current_board[i][j + 1] = -1;
+						visited[i][j + 1] = 1;
+						Current_board[i + 1][j] = 1;
+						visited[i + 1][j] = 1;
+					}
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i][j - 1] == 0)
+				{
+					int random_number = (rand() % 2) + 0;
+					if (random_number == 0)
+					{
+						Current_board[i - 1][j + 1] = 1;
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] = -1;
+						visited[i][j - 1] = 1;
+					}
+					else
+					{
+						Current_board[i - 1][j + 1] = -1;
+						visited[i - 1][j + 1] = 1;
+						Current_board[i][j - 1] = 1;
+						visited[i][j - 1] = 1;
+					}
+				}
+
+
+				//我方无用位置1
+
+
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 2] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 1] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 1][j] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i - 1][j - 1] == 1 && Current_board[i][j - 2] == 1 && Current_board[i][j - 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 2] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 1] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 1][j] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i + 1][j + 1] == 1 && Current_board[i][j + 2] == 1 && Current_board[i][j + 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//我方无用位置2
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 2] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 2][j + 1] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1 && Current_board[i - 1][j - 1] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 2] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 2][j - 1] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1 && Current_board[i + 1][j + 1] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//公共无用位置
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j + 1] == 1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j + 2] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j + 1] == 1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == -1 && Current_board[i - 2][j] == -1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (j - 2 >= 0 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i - 1][j] == 1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == -1 && Current_board[i][j - 2] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == 1 && Current_board[i][j - 1] == 1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j - 2] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j - 1] == 1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == -1 && Current_board[i + 2][j] == -1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (j + 2 <= 10 && i + 1 <= 10 && i - 1 >= 0 && Current_board[i][j] == 1 && Current_board[i + 1][j] == 1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == -1 && Current_board[i][j + 2] == -1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//对方无用位置1
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == -1 && Current_board[i - 1][j + 2] == -1 && Current_board[i - 2][j + 2] == -1 && Current_board[i - 1][j + 1] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == -1 && Current_board[i - 2][j + 1] == -1 && Current_board[i - 2][j] == -1 && Current_board[i - 1][j] == 0)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == -1 && Current_board[i - 1][j - 1] == -1 && Current_board[i][j - 2] == -1 && Current_board[i][j - 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 2 >= 0 && Current_board[i][j] == -1 && Current_board[i][j - 1] == -1 && Current_board[i + 1][j - 2] == -1 && Current_board[i + 2][j - 2] == -1 && Current_board[i + 1][j - 1] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == -1 && Current_board[i + 2][j - 1] == -1 && Current_board[i + 2][j] == -1 && Current_board[i + 1][j] == 0)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i + 1 <= 10 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j] == -1 && Current_board[i + 1][j + 1] == -1 && Current_board[i][j + 2] == -1 && Current_board[i][j + 1] == 0)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
+
+
+				//对方无用位置2
+				if (i - 2 >= 0 && j + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i - 1][j + 1] == 0 && Current_board[i - 2][j + 1] == 1 && Current_board[i - 2][j + 2] == 1 && Current_board[i - 1][j + 2] == 1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j + 1);
+				}
+				if (i - 2 >= 0 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i - 1][j] == 0 && Current_board[i - 1][j - 1] == 1 && Current_board[i - 2][j] == 1 && Current_board[i - 2][j + 1] == 1)
+				{
+					useless_nodes_x.push(i - 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j - 2 >= 0 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j - 1] == 0 && Current_board[i + 1][j - 2] == 1 && Current_board[i][j - 2] == 1 && Current_board[i - 1][j - 1] == 1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j - 1);
+				}
+				if (j - 2 >= 0 && i + 2 <= 10 && Current_board[i][j] == -1 && Current_board[i + 1][j - 1] == 0 && Current_board[i + 2][j - 1] == 1 && Current_board[i + 2][j - 2] == 1 && Current_board[i + 1][j - 2] == 1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j - 1);
+				}
+				if (i + 2 <= 10 && j + 1 <= 10 && j - 1 >= 0 && Current_board[i][j] == -1 && Current_board[i + 1][j] == 0 && Current_board[i + 1][j + 1] == 1 && Current_board[i + 2][j] == 1 && Current_board[i + 2][j - 1] == 1)
+				{
+					useless_nodes_x.push(i + 1);
+					useless_node_y.push(j);
+				}
+				if (i - 1 >= 0 && j + 2 <= 10 && i + 1 <= 10 && Current_board[i][j] == -1 && Current_board[i][j + 1] == 0 && Current_board[i - 1][j + 2] == 1 && Current_board[i][j + 2] == 1 && Current_board[i + 1][j + 1] == 1)
+				{
+					useless_nodes_x.push(i);
+					useless_node_y.push(j + 1);
+				}
 				while (useless_nodes_x.size() >= 2)				//随机落子
 				{
 					int x = useless_nodes_x.top();
@@ -3387,7 +3387,7 @@ Union_node* union_find_father_first(Union_node* son)			//寻找并查集根结�
 					visited[x][y] = 1;
 					useless_nodes_x.pop();
 					useless_node_y.pop();
-				
+
 					x = useless_nodes_x.top();
 					y = useless_node_y.top();
 					Current_board[x][y] = -1;
@@ -3405,22 +3405,22 @@ Union_node* union_find_father_first(Union_node* son)			//寻找并查集根结�
 					useless_nodes_x.pop();
 					useless_node_y.pop();
 				}
-				 visited[i][j] = 1;
-			 }
-		 }
-	 }
+				visited[i][j] = 1;
+			}
+		}
+	}
 }
- 
- void visited_reset()
- {
-	 for (int i = 0; i < 11; i++)
-	 {
-		 for (int j = 0; j < 11; j++)
-		 {
-			 visited[i][j] = 0;
-		 }
-	 }
- }
+
+void visited_reset()
+{
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
+			visited[i][j] = 0;
+		}
+	}
+}
 
 
 int protect(int x, int y)
@@ -3811,189 +3811,189 @@ int protect(int x, int y)
 		}
 	}
 	return 1;
-} 
+}
 
 
 
 
- //判断深度
- int MCTNode::isTerminal(){
-	 int depth=0;
-	 MCTNode* ptr = this;
-	 while(ptr->parent!=nullptr){
-		 depth++;
-		 ptr=ptr->parent;
-	 }
-	 if(depth<=6){
-		 return 0;
-	 }
-	 else{
-		 return 1;
-	 }
- }
- 
- //输出结果
- void MCTNode::Result_Output(){
-    printf("%d %d",this->x,this->y);
- }
- 
- MCTNode::MCTNode(MCTNode* parent, int x, int y)
- {
-	 this->parent = parent;
-	 this->score = 0;
-	 this->search_time = 0;
-	 this->x = x, this->y = y;
- }
- 
- double MCTNode::UCT()
- {
-	 return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
- }
- 
- MCTNode* MCTNode::expand(MCTNode* node) {
-	 //双距离选点
-	 int mycolor = who_first();
-	 struct xgznode** better_choice = toget_twodis(mycolor,color);
-	 MCTNode* new_node;
-	 
-	 for (int k = xgznode_num-1 ; k >= 0; k--) {
-		 
-		 new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
-		 node->child.emplace_back(new_node);
-	 }
-	 return new_node;
- }
- 
- MCTNode* MCTNode::select(MCTNode* node)
- {
-	 color = 1;
-	 while (node->isTerminal()== 0 ) {
-		 if (!node->child.empty()) {
-			 node = node->bestChild(node);
-		 }
-		 else {
-			 node = node->expand(node);
-			 //				return sub_node;
-		 }
-		 
-		 //补充并查集
-		 union_find_update(node->x, node->y,color);
-		 //补充棋盘
-		 Current_board[node->x][node->y] = color;
-		 color = -color;
-		 
-	 }
- 
-	 return node;
-	 
- }
- //达到层数后随机落点
+//判断深度
+int MCTNode::isTerminal() {
+	int depth = 0;
+	MCTNode* ptr = this;
+	while (ptr->parent != nullptr) {
+		depth++;
+		ptr = ptr->parent;
+	}
+	if (depth <= 6) {
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
+//输出结果
+void MCTNode::Result_Output() {
+	printf("%d %d", this->x, this->y);
+}
+
+MCTNode::MCTNode(MCTNode* parent, int x, int y)
+{
+	this->parent = parent;
+	this->score = 0;
+	this->search_time = 0;
+	this->x = x, this->y = y;
+}
+
+double MCTNode::UCT()
+{
+	return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
+}
+
+MCTNode* MCTNode::expand(MCTNode* node) {
+	//双距离选点
+	int mycolor = who_first();
+	struct xgznode** better_choice = toget_twodis(mycolor, color);
+	MCTNode* new_node = nullptr;
+
+	for (int k = xgznode_num - 1; k >= 0; k--) {
+
+		new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
+		node->child.emplace_back(new_node);
+	}
+	return new_node;
+}
+
+MCTNode* MCTNode::select(MCTNode* node)
+{
+	color = 1;
+	while (node->isTerminal() == 0) {
+		if (!node->child.empty()) {
+			node = node->bestChild(node);
+		}
+		else {
+			node = node->expand(node);
+			//				return sub_node;
+		}
+
+		//补充并查集
+		union_find_update(node->x, node->y, color);
+		//补充棋盘
+		Current_board[node->x][node->y] = color;
+		color = -color;
+
+	}
+
+	return node;
+
+}
+//达到层数后随机落点
 int MCTNode::simulate() {
 	int randomnode[121];
-	for(int i=0;i<121;i++){
+	for (int i = 0; i < 121; i++) {
 		randomnode[i] = i;
 	}
-	
-	srand ( unsigned ( time(0) ) );
-	random_shuffle(randomnode,randomnode+121);
-	
-	for(int i=0;i<121;i++){	
-		int x,y;
-		x=i/11,y=i%11;
-		if(Current_board[x][y] == 0){
-			Current_board[x][y]=color;
-			union_find_update(x,y,color);
-			color=-color;
-			if( is_win() != 0){
+
+	srand(unsigned(time(0)));
+	random_shuffle(randomnode, randomnode + 121);
+
+	for (int i = 0; i < 121; i++) {
+		int x, y;
+		x = i / 11, y = i % 11;
+		if (Current_board[x][y] == 0) {
+			Current_board[x][y] = color;
+			union_find_update(x, y, color);
+			color = -color;
+			if (is_win() != 0) {
 				return is_win();
 			}
 		}
 	}
-	
+
 	return is_win();
 }
- 
- void MCTNode::backup(MCTNode* node, int reward) {
-	 while (node != nullptr) {
-		 if(Current_board[node->x][node->y]==reward){
-		    node->win_time+=reward;
-		 }
-		 node->search_time++;
-		 node = node->parent;
-	 }
- }
- MCTNode* MCTNode::bestChild(MCTNode* node) 
- {
-	 int UCT_number = 0;
-	 MCTNode* best = NULL;
-	 vector<MCTNode*>::iterator p = node->child.begin();
-	 for (; p != node->child.end(); p++)
-	 {
-		 if ((*p)->search_time == 0)
-			 return (*p);
-		 else if (UCT_number < (*p)->UCT())
-			 best = (*p);
-	 }
-	 return best;
- }
- 
- //谁先下
- int who_first(){
-	 if(board[1][2]==-1){
-		 return 0;//对面先下
-	 }
-	 else{
-		 return 1;//我们先下
-	 }
- }
- 
- MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
 
-	 MCTNode* bestchoice;
-	 MCTNode* root = new MCTNode(nullptr, x, y);
-	 memcpy(board,Current_board,121 * sizeof(int));        //蒙特卡洛重置用的board初始化
-	 
-	 
-	 //卡秒退
-	 int threshold = 0.8 * (double)CLOCKS_PER_SEC; //CLOCKS_PER_SEC 和 clock()的含义可百度
-	 int start_time, current_time;
-	 start_time = current_time = clock();
-	 while (current_time-start_time < threshold){ //到 0.8 秒立即跳出循环
-		 
-		 visited_reset();
-		 union_board_reset();                                  //变化并查集初始化
-		 memcpy(Current_board,board,121*sizeof(int));
-		 MCTNode* expand_node = root->select(root);
-		 int reward = expand_node->simulate();
-		 backup(expand_node, reward);
-		 
-		 current_time = clock();
-	 }
-	 	
-	double final = -1;
-	for(int i = 0; i < (int)root -> child.size(); i++)
+void MCTNode::backup(MCTNode* node, int reward) {
+	while (node != nullptr) {
+		if (Current_board[node->x][node->y] == reward) {
+			node->win_time += reward;
+		}
+		node->search_time++;
+		node = node->parent;
+	}
+}
+MCTNode* MCTNode::bestChild(MCTNode* node)
+{
+	int UCT_number = 0;
+	MCTNode* best = NULL;
+	vector<MCTNode*>::iterator p = node->child.begin();
+	for (; p != node->child.end(); p++)
 	{
-		double node_score = 1.0 * (root -> child[i]->win_time) / (root -> child[i]->search_time);
-		if( final < node_score)
+		if ((*p)->search_time == 0)
+			return (*p);
+		else if (UCT_number < (*p)->UCT())
+			best = (*p);
+	}
+	return best;
+}
+
+//谁先下
+int who_first() {
+	if (board[1][2] == -1) {
+		return 0;//对面先下
+	}
+	else {
+		return 1;//我们先下
+	}
+}
+
+MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
+
+	MCTNode* bestchoice = nullptr;
+	MCTNode* root = new MCTNode(nullptr, x, y);
+	memcpy(board, Current_board, 121 * sizeof(int));        //蒙特卡洛重置用的board初始化
+
+
+	//卡秒退
+	int threshold = 0.8 * (double)CLOCKS_PER_SEC; //CLOCKS_PER_SEC 和 clock()的含义可百度
+	int start_time, current_time;
+	start_time = current_time = clock();
+	while (current_time - start_time < threshold) { //到 0.8 秒立即跳出循环
+
+		visited_reset();
+		union_board_reset();                                  //变化并查集初始化
+		memcpy(Current_board, board, 121 * sizeof(int));
+		MCTNode* expand_node = root->select(root);
+		int reward = expand_node->simulate();
+		backup(expand_node, reward);
+
+		current_time = clock();
+	}
+
+	double final = -1;
+	for (int i = 0; i < (int)root->child.size(); i++)
+	{
+		double node_score = 1.0 * (root->child[i]->win_time) / (root->child[i]->search_time);
+		if (final < node_score)
 		{
 			final = node_score;
-			bestchoice=root->child[i];
+			bestchoice = root->child[i];
 		}
 	}
 
-	 
-	 return bestchoice;
- }
- 
 
- 
- 
- 
- 
- 
- 
- 
- 
+	return bestchoice;
+}
+
+
+
+
+
+
+
+
+
+
 int main()
 {
 	int x, y, n;
@@ -4005,11 +4005,11 @@ int main()
 	}
 	cin >> x >> y;
 	if (x != -1) iniboard[x][y] = -1;	//对方
-	
-	//此时board[][]里存储的就是当前棋盘的所有棋子信息,x和y存的是对方最近一步下的棋
-	
 
-	else{
+	//此时board[][]里存储的就是当前棋盘的所有棋子信息,x和y存的是对方最近一步下的棋
+
+
+	else {
 		printf("1 2");
 		return 0;
 	}
@@ -4019,12 +4019,12 @@ int main()
 	int end_sign = protect(x, y);
 	if (!end_sign)
 		return 0;
-	
-	
+
+
 	fill_board();                                         //填充无用位置
 	union_find();     									  //重置用的并查集初始化
 	union_board_reset();
-	if(is_win()){
+	if (is_win()) {
 		for (int i = 0; i < 11; i++)
 		{
 			for (int j = 0; j < 11; j++)
@@ -4063,21 +4063,21 @@ int main()
 		}
 		return 0;
 	}
-	
-	
-	
-	MCTNode* bestchoice = nullptr;
-	bestchoice=bestchoice->monteCarloTreeSearch( x, y);
-	bestchoice->Result_Output();
-	
 
-	
-	
-	
-	
-	
-	
-	
+
+
+	MCTNode* bestchoice = nullptr;
+	bestchoice = bestchoice->monteCarloTreeSearch(x, y);
+	bestchoice->Result_Output();
+
+
+
+
+
+
+
+
+
 	// 向平台输出决策结果
 //	cout << new_x << ' ' << new_y << endl;
 	return 0;

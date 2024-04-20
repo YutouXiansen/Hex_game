@@ -2440,7 +2440,7 @@ int protect(int x, int y)
 				printf("%d %d", x + 1, y - 2);
 				return 0;
 			}
-			if (x + 2 <= 10 && y - 2 >= 0 && iniboard[x + 2][y - 1] == 0 && iniboard[x + 1][y - 1] == 0 && iniboard[x + 2][y - 2] == 1 && iniboard[x][y - 1] == 0 && iniboard[x][y - 2] == 0 && iniboard[x - 1][y - 2] == 0)
+			if (x + 2 <= 10 && y - 2 >= 0 && x - 1 >= 0 && iniboard[x + 2][y - 1] == 0 && iniboard[x + 1][y - 1] == 0 && iniboard[x + 2][y - 2] == 1 && iniboard[x][y - 1] == 0 && iniboard[x][y - 2] == 0 && iniboard[x - 1][y - 2] == 0)
 			{
 				printf("%d %d", x + 1, y - 2);
 				return 0;
@@ -2616,7 +2616,7 @@ int protect(int x, int y)
 				printf("%d %d", x - 2, y + 1);
 				return 0;
 			}
-			if (y + 2 <= 10 && x - 2 >= 0 && iniboard[x - 1][y + 2] == 0 && iniboard[x - 1][y + 1] == 0 && iniboard[x - 2][y + 2] == 1 && iniboard[x - 1][y] == 0 && iniboard[x - 2][y] == 0 && iniboard[x - 2][y - 1] == 0)
+			if (y + 2 <= 10 && x - 2 >= 0 && y - 1 >= 0 && iniboard[x - 1][y + 2] == 0 && iniboard[x - 1][y + 1] == 0 && iniboard[x - 2][y + 2] == 1 && iniboard[x - 1][y] == 0 && iniboard[x - 2][y] == 0 && iniboard[x - 2][y - 1] == 0)
 			{
 				printf("%d %d", x - 2, y + 1);
 				return 0;

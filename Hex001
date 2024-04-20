@@ -1511,13 +1511,13 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是对方边界
 			{
-				union_board[i][j].father_x = 11;
-				union_board[i][j].father_y = -1;
+				Current_union[i][j].father_x = 11;
+				Current_union[i][j].father_y = -1;
 			}
 			if (j == 10 && Current_board[i][j] == -1)				//对对方，且第十一排元素，父节点就是对方边界
 			{
-				union_board[i][j].father_x = 11;
-				union_board[i][j].father_y = 11;
+				Current_union[i][j].father_x = 11;
+				Current_union[i][j].father_y = 11;
 			}
 			if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{
@@ -1560,13 +1560,13 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (i == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是我方边界
 			{
-				union_board[i][j].father_x = -1;
-				union_board[i][j].father_y = -1;
+				Current_union[i][j].father_x = -1;
+				Current_union[i][j].father_y = -1;
 			}
 			else if (i == 10 && Current_board[i][j] == -1)			//对对方，且第十一排元素，父节点就是我方边界
 			{
-				union_board[i][j].father_x = 11;
-				union_board[i][j].father_y = -1;
+				Current_union[i][j].father_x = 11;
+				Current_union[i][j].father_y = -1;
 			}
 			if (Current_board[i][j] == -1)			//对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{
@@ -1606,13 +1606,13 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是对方边界
 			{
-				union_board[i][j].father_x = 11;
-				union_board[i][j].father_y = -1;
+				Current_union[i][j].father_x = 11;
+				Current_union[i][j].father_y = -1;
 			}
 			if (j == 10 && Current_board[i][j] == 1)				//对我方，且第十一排元素，父节点就是对方边界
 			{
-				union_board[i][j].father_x = 11;
-				union_board[i][j].father_y = 11;
+				Current_union[i][j].father_x = 11;
+				Current_union[i][j].father_y = 11;
 			}
 			if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{

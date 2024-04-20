@@ -3607,7 +3607,7 @@ int protect(int x, int y)
 				printf("%d %d", x, y - 2);
 				return 0;
 			}
-			if（x - 1 >= 0 && x + 1 <= 10 && y - 3 >= 0 && iniboard[x - 1][y] == 0 && iniboard[x - 1][y - 1] == 1 && iniboard[x][y - 1] == 0 && iniboard[x + 1][y - 2] == 0 && iniboard[x + 1][y - 3] == 0 && iniboard[x][y - 2] == 0)
+			if (x - 1 >= 0 && x + 1 <= 10 && y - 3 >= 0 && iniboard[x - 1][y] == 0 && iniboard[x - 1][y - 1] == 1 && iniboard[x][y - 1] == 0 && iniboard[x + 1][y - 2] == 0 && iniboard[x + 1][y - 3] == 0 && iniboard[x][y - 2] == 0)
 			{
 				printf("%d %d", x, y - 2);
 				return 0;

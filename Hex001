@@ -33,7 +33,7 @@ struct Union_node
 struct Union_node Current_union[11][11];			//并查集
 struct Union_node union_board[11][11];
 struct Union_node boundary[4] = { {&boundary[0],-1,0},{&boundary[1],-1,1},{&boundary[2],-1,2},{&boundary[3],-1,3}};						//并查集的四个边界   红方1，蓝方1，红方2，蓝方2
-struct Union_node Current_boundary[4] = { {&Current_boundary[0],-1,0},{&Current_boundary[0],-1,1},{&Current_boundary[0],-1,2},{&Current_boundary[0],-1,3}};
+struct Union_node Current_boundary[4] = { {&Current_boundary[0],-1,0},{&Current_boundary[1],-1,1},{&Current_boundary[2],-1,2},{&Current_boundary[3],-1,3}};
 stack<int> useless_nodes_x, useless_node_y;
 class MCTNode
 {

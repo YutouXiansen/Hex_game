@@ -3876,7 +3876,7 @@ int MCTNode::isTerminal() {
 		depth++;
 		ptr = ptr->parent;
 	}
-	if (depth <= 6) {
+	if (depth <= 4) {
 		return 0;
 	}
 	else {
@@ -3908,7 +3908,7 @@ MCTNode* MCTNode::expand(MCTNode* node) {
 	struct xgznode** better_choice = toget_twodis(mycolor, color);
 	MCTNode* new_node = nullptr;
 
-	for (int k = xgznode_num - 1; k >= 0; k--) {
+	for (int k = 0; k < xgznode_num; k++) {
 
 		new_node = new MCTNode(node, better_choice[k]->i, better_choice[k]->j);
 		node->child.emplace_back(new_node);

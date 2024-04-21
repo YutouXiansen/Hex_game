@@ -2465,11 +2465,11 @@ void union_find()			//棋盘并查集初始化
 			{
 				if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是我方边界
 				{
-					union_board[i][j].father = union_find_father_first(&Current_boundary[0]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&Current_boundary[0]);
 				}
 				else if (i == 10 && Current_board[i][j] == 1)			//对我方，且第十一排元素，父节点就是我方边界
 				{
-					union_board[i][j].father = union_find_father_first(&Current_boundary[2]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&Current_boundary[2]);
 				}
 				if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到该节点
 				{
@@ -2524,11 +2524,11 @@ void union_find()			//棋盘并查集初始化
 			{
 				if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是对方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[1]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[1]);
 				}
 				if (j == 10 && Current_board[i][j] == -1)				//对对方，且第十一排元素，父节点就是对方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[3]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[3]);
 				}
 				if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到该节点
 				{
@@ -2595,11 +2595,11 @@ void union_find()			//棋盘并查集初始化
 			{
 				if (i == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是我方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[0]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[0]);
 				}
 				else if (i == 10 && Current_board[i][j] == -1)			//对对方，且第十一排元素，父节点就是我方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[2]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[2]);
 				}
 				if (Current_board[i][j] == -1)			//对对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 				{
@@ -2654,11 +2654,11 @@ void union_find()			//棋盘并查集初始化
 			{
 				if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是对方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[1]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[1]);
 				}
 				if (j == 10 && Current_board[i][j] == 1)				//对我方，且第十一排元素，父节点就是对方边界
 				{
-					union_board[i][j].father = union_find_father_first(&boundary[3]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[3]);
 				}
 				if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 				{
@@ -2716,7 +2716,7 @@ void union_find()			//棋盘并查集初始化
 		for (int j = 0; j < 11; j++)
 		{
 			struct Union_node* vir_father = union_find_father_first(&union_board[i][j]);
-			if(vir_father->x != -1)
+			if (vir_father->x != -1)
 			{
 				Current_union[i][j].father = &Current_union[vir_father->x][vir_father->y];
 			}
@@ -2742,7 +2742,7 @@ void union_find()			//棋盘并查集初始化
 
 void union_board_reset()
 {
-		for (int i = 0; i < 11; i++)
+	for (int i = 0; i < 11; i++)
 	{
 		for (int j = 0; j < 11; j++)
 		{
@@ -2779,11 +2779,11 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是我方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[0]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[0]);
 			}
 			else if (i == 10 && Current_board[i][j] == 1)			//对我方，且第十一排元素，父节点就是我方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[2]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[2]);
 			}
 			if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{
@@ -2835,11 +2835,11 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (j == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是对方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[1]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[1]);
 			}
 			if (j == 10 && Current_board[i][j] == -1)				//对对方，且第十一排元素，父节点就是对方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[3]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[3]);
 			}
 			if (Current_board[i][j] == -1)			//对对方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{
@@ -2894,11 +2894,11 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (i == 0 && Current_board[i][j] == -1)				//对对方，且第一排元素，父节点就是我方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[0]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[0]);
 			}
 			else if (i == 10 && Current_board[i][j] == -1)			//对对方，且第十一排元素，父节点就是我方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[2]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[2]);
 			}
 			if (Current_board[i][j] == -1)			//对方，非第一排元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{
@@ -2950,11 +2950,11 @@ void union_find_update(int i, int j, int color)			//落点时并查集更新
 		{
 			if (j == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是对方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[1]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[1]);
 			}
 			if (j == 10 && Current_board[i][j] == 1)				//对我方，且第十一排元素，父节点就是对方边界
 			{
-				Current_union[i][j].father = union_find_father(&Current_boundary[3]);
+				union_find_father(&Current_union[i][j])->father = union_find_father(&Current_boundary[3]);
 			}
 			if (Current_board[i][j] == 1)			//对我方，非第一列元素，周围己方落子点都归并一次，归并到j/y值最小的节点
 			{

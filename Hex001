@@ -3951,7 +3951,7 @@ int MCTNode::simulate() {
 
 	for (int i = 0; i < 121; i++) {
 		int x, y;
-		x = i / 11, y = i % 11;
+		x = randomnode[i] / 11, y = randomnode[i] % 11;
 		if (Current_board[x][y] == 0) {
 			Current_board[x][y] = color;
 			union_find_update(x, y, color);

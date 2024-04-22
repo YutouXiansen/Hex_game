@@ -612,24 +612,40 @@ int red_twodis_to_right_to_right(int aim)
 void updata()
 {
 	int aim = 0;
+	int wnum = 0;
 	while (aim < SIZE)
 	{
 		aim = blue_twodis_to_down(aim);
+		wnum++;
+		if (wnum > 16)
+			break;
 	}
 	aim--;
+	wnum = 0;
 	while (aim >= 0)
 	{
 		aim = blue_twodis_to_up(aim);
+		wnum++;
+		if (wnum > 16)
+			break;
 	}
 	aim++;
+	wnum = 0;
 	while (aim < SIZE)
 	{
 		aim = red_twodis_to_left(aim);
+		wnum++;
+		if (wnum > 16)
+			break;
 	}
 	aim--;
+	wnum = 0;
 	while (aim >= 0)
 	{
 		aim = red_twodis_to_right(aim);
+		wnum++;
+		if (wnum > 16)
+			break;
 	}
 	for (int i = 0; i < SIZE; i++)
 	{

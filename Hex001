@@ -2432,7 +2432,7 @@ int MCTNode::isTerminal() {
 		depth++;
 		ptr = ptr->parent;
 	}
-	if (depth <= 4) {
+	if (depth < 4) {
 		return 0;
 	}
 	else {
@@ -2447,6 +2447,7 @@ void MCTNode::Result_Output() {
 
 MCTNode::MCTNode(MCTNode* parent, int x, int y)
 {
+	this->win_time = 0;
 	this->parent = parent;
 	this->score = 0;
 	this->search_time = 0;
@@ -2460,7 +2461,7 @@ double MCTNode::UCT()
 
 MCTNode* MCTNode::expand(MCTNode* node) {
 	//双距离选点
-	int mycolor = who_first();
+	//int mycolor = who_first();
 	struct xgznode** better_choice = to_get_twodis_best_point();
 	MCTNode* new_node = nullptr;
 

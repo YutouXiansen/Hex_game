@@ -2525,7 +2525,7 @@ int MCTNode::simulate() {
 void MCTNode::backup(MCTNode* node, int reward) {
 	while (node != nullptr) {
 		if (Current_board[node->x][node->y] == reward) {
-			node->win_time += reward;
+			node->win_time ++;
 		}
 		node->search_time++;
 		node = node->parent;

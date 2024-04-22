@@ -77,17 +77,23 @@ struct randomnode {
 const int SIZE1 = 15;
 const int RealSIZE = 13;
 const int need = 6;
-int xgznode_num = 6;
-int** board1 = new int* [RealSIZE];
+int xgznode_num = 4;
+//int** board1 = new int* [RealSIZE];
 struct xgznode
 {
+	int fill;
 	int i;
 	int j;
-	int distance;
-	int firdistance;
-	int sedistance;
+	int blue_distance;
+	int blue_dis_to_down;
+	int blue_dis_to_up;
+	int red_distance;
+	int red_dis_to_left;
+	int red_dis_to_right;
+	int blue_val;
+	int red_val;
 };
-
+/*
 bool  operator > (xgznode a, xgznode b)
 {
 	if (a.distance > b.distance)
@@ -95,31 +101,10 @@ bool  operator > (xgznode a, xgznode b)
 	else
 		return false;
 }
+*/
 
-vector <xgznode> redneedsort;
-vector <xgznode> buleneedsort;
 
-xgznode*** myred_twodis_bule_to_A0();    // red = 1    blue = -1
-xgznode*** myred_twodis_bule_to_A10();
-xgznode*** myred_twodis_red_to_A0();
-xgznode*** myred_twodis_red_to_A10();
-xgznode*** mybule_twodis_bule_to_A0();   // red = -1    blue = 1
-xgznode*** mybule_twodis_bule_to_A10();
-xgznode*** mybule_twodis_red_to_A0();
-xgznode*** mybule_twodis_red_to_A10();
-void findseconddis(int i, int j, int flag, xgznode*** dis);      //flag = 1  ---> count 1
-void make_real();
-void redsort(xgznode** dis_red);
-void bulesort(xgznode** dis_bule);
-xgznode*** myred_toget_twodis_red();
-xgznode*** myred_toget_twodis_bule();
-xgznode*** mybule_toget_twodis_bule();
-xgznode*** mybule_toget_twodis_red();
-void Createdis();
-void Deletedis();
-int getpot(xgznode*** dis, xgznode*** buledis);
-xgznode** toget_twodis(int mycolor, int color);
-xgznode*** get_newtwodis(int color, int i, int j, xgznode*** dis);
+
 
 
 
@@ -143,2278 +128,838 @@ void fill_board();
 
 
 
-
 //定义全局变量,函数
-void make_real()
+xgznode*** myboard;
+void make_myboard();
+xgznode** to_get_twodis_best_point();  // my = 1 -> mycolor
+int blue_twodis_to_down(int aim);
+int blue_twodis_to_up(int aim);
+int blue_to_down_to_right(int aim);
+int blue_twodis_to_down_to_down(int aim);
+int blue_twodis_to_up_to_up(int aim);
+int blue_to_up_to_left(int aim);
+
+int red_twodis_to_left(int aim);
+int red_twodis_to_right(int aim);
+int red_to_left_to_up(int aim);
+int red_twodis_to_left_to_left(int aim);
+int red_to_right_to_down(int aim);
+int red_twodis_to_right_to_right(int aim);
+
+void updata();
+int get_pot(int color);
+int mymin(int a, int b);
+
+
+
+int mymin(int a, int b)
 {
+	if (a < b)
+		return a;
+	else
+		return b;
+}
+
+
+
+void make_myboard()              //make red = 1;
+{
+	myboard = new xgznode * *[11];
+	for (int i = 0; i < 11; i++)
+	{
+		myboard[i] = new xgznode * [11];
+		for (int j = 0; j < 11; j++)
+		{
+			myboard[i][j] = new xgznode;
+			myboard[i][j]->fill = 0;
+			myboard[i][j]->i = i;
+			myboard[i][j]->j = j;
+			myboard[i][j]->blue_distance = 128;
+			myboard[i][j]->blue_dis_to_down = 128;
+			myboard[i][j]->blue_dis_to_up = 128;
+			myboard[i][j]->red_distance = 128;
+			myboard[i][j]->red_dis_to_left = 128;
+			myboard[i][j]->red_dis_to_right = 128;
+			myboard[i][j]->blue_val = 1;
+			myboard[i][j]->red_val = 1;
+		}
+	}
+	int red = Current_board[1][2];
 	for (int i = 0; i < 11; i++)
 	{
 		for (int j = 0; j < 11; j++)
 		{
-			board1[i + 1][j + 1] = Current_board[i][j];
+			if (Current_board[i][j] == red)
+			{
+				myboard[i][j]->fill = 1;
+				myboard[i][j]->red_val = 0;
+				myboard[i][j]->blue_val = inf;
+				myboard[i][j]->blue_dis_to_down = inf;
+				myboard[i][j]->blue_dis_to_up = inf;
+				myboard[i][j]->blue_distance = inf;
+			}
+			else if (Current_board[i][j] == 0 - red)
+			{
+				myboard[i][j]->fill = 1;
+				myboard[i][j]->red_val = inf;
+				myboard[i][j]->blue_val = 0;
+				myboard[i][j]->red_dis_to_left = inf;
+				myboard[i][j]->red_dis_to_right = inf;
+				myboard[i][j]->red_distance = inf;
+			}
 		}
 	}
 	return;
 }
 
-xgznode*** myred_twodis_bule_to_A0() // red = 1    blue = -1
+int blue_twodis_to_down(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	if (aim == 0)
 	{
-		board1[0][i] = 1;
-		board1[12][i] = 1;
-		board1[i][0] = -1;
-		board1[i][12] = -1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		for (int i = 0; i < SIZE; i++)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][1] == -1)
-		{
-			dis[i][1]->distance = 0;
-		}
-		else if (board1[i][1] == 0)
-		{
-			dis[i][1]->distance = 1;
-			dis[i][1]->firdistance = 0;
-			dis[i][1]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][1]->distance = inf;
-			dis[i][1]->firdistance = inf;
-			dis[i][1]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
+			if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_val > 0)
 			{
-				dis[i][j]->distance = inf;
+				myboard[i][aim]->blue_dis_to_down = 1;
+			}
+
+		}
+	}
+	else
+	{
+		for (int i = 0; i < SIZE - 1; i++)
+		{
+			int min = 0;
+			min = mymin(myboard[i][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val, myboard[i + 1][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val);
+			if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_dis_to_down > min)
+			{
+				myboard[i][aim]->blue_dis_to_down = min;
 			}
 		}
-	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
+		if (myboard[SIZE - 1][aim]->blue_val < inf && myboard[SIZE - 1][aim]->blue_dis_to_down > myboard[SIZE - 1][aim - 1]->blue_dis_to_down + myboard[SIZE - 1][aim]->blue_val)
 		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
-		{
-			if (board1[i][j] != -1)
-			{
-				dis[i][j] -= 3;
-			}
+			myboard[SIZE - 1][aim]->blue_dis_to_down = myboard[SIZE - 1][aim - 1]->blue_dis_to_down + myboard[SIZE - 1][aim]->blue_val;
 		}
 	}
 
-	return dis;
+	blue_to_down_to_right(aim);
+
+	int back = aim - 1;
+	int isback = blue_twodis_to_down_to_down(back);
+	if (isback == 0)
+		return aim + 1;
+	while (isback != 0)
+	{
+		back--;
+		isback = blue_twodis_to_down_to_down(back);
+	}
+	return back;
 }
 
-xgznode*** myred_twodis_bule_to_A10()  // red = 1    blue = -1
+int blue_to_down_to_right(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	int one = 0;
+	for (int i = 0; i < SIZE; i++)
 	{
-		board1[0][i] = 1;
-		board1[12][i] = 1;
-		board1[i][0] = -1;
-		board1[i][12] = -1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
-		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][11] == -1)
-		{
-			dis[i][11] = 0;
-		}
-		else if (board1[i][11] == 0)
-		{
-			dis[i][11]->distance = 1;
-			dis[i][11]->firdistance = 0;
-			dis[i][11]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][11]->distance = inf;
-			dis[i][11]->firdistance = inf;
-			dis[i][11]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
-			{
-				dis[i][j]->distance = inf;
-			}
-		}
-	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
+		int lpoint = i - 1, rpoint = i + 1;
 
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
+		while (lpoint != -1 && myboard[lpoint + 1][aim]->blue_dis_to_down + myboard[lpoint][aim]->blue_val < myboard[lpoint][aim]->blue_dis_to_down)
 		{
-			if (dis[i][11]->distance != 128)
+			if (myboard[lpoint][aim]->blue_val < inf)
 			{
-				dis[i][11]->distance -= 3;
+				myboard[lpoint][aim]->blue_dis_to_down = myboard[lpoint + 1][aim]->blue_dis_to_down + myboard[lpoint][aim]->blue_val;
+				one++;
+				lpoint--;
+			}
+		}
+		while (rpoint != SIZE && myboard[rpoint - 1][aim]->blue_dis_to_down + myboard[rpoint][aim]->blue_val < myboard[rpoint][aim]->blue_dis_to_down)
+		{
+			if (myboard[rpoint][aim]->blue_val < inf)
+			{
+				myboard[rpoint][aim]->blue_dis_to_down = myboard[rpoint - 1][aim]->blue_dis_to_down + myboard[rpoint][aim]->blue_val;
+				one++;
+				rpoint++;
 			}
 		}
 	}
-	return dis;
+	return one;
 }
 
-xgznode*** myred_twodis_red_to_A0() // red = 1    blue = -1
+int blue_twodis_to_down_to_down(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	if (aim < 0)
+		return 0;
+	int ret = 0;
+	if (myboard[0][aim]->blue_val < inf && myboard[0][aim]->blue_dis_to_down > myboard[0][aim + 1]->blue_dis_to_down + myboard[0][aim]->blue_val)
 	{
-		board1[0][i] = 1;
-		board1[12][i] = 1;
-		board1[i][0] = -1;
-		board1[i][12] = -1;
+		myboard[0][aim]->blue_dis_to_down = myboard[0][aim + 1]->blue_dis_to_down + myboard[0][aim]->blue_val;
+		ret++;
 	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
+	for (int i = 1; i < SIZE; i++)
 	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		int min = 0;
+		min = mymin(myboard[i - 1][aim + 1]->blue_dis_to_down + myboard[i][aim]->blue_val, myboard[i][aim + 1]->blue_dis_to_down + myboard[i][aim]->blue_val);
+		if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_dis_to_down > min)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
+			myboard[i][aim]->blue_dis_to_down = min;
+			ret++;
 		}
 	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][1] == -1)
-		{
-			dis[i][1] = 0;
-		}
-		else if (board1[i][1] == 0)
-		{
-			dis[i][1]->distance = 1;
-			dis[i][1]->firdistance = 0;
-			dis[i][1]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][1]->distance = inf;
-			dis[i][1]->firdistance = inf;
-			dis[i][1]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
-			{
-				dis[i][j]->distance = inf;
-			}
-		}
-	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
-		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
-		}
-	}
-	return dis;
+	ret += blue_to_down_to_right(aim);
+	return ret;
 }
 
-xgznode*** myred_twodis_red_to_A10()  // red = 1    blue = -1
+int blue_twodis_to_up(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	if (aim == SIZE - 1)
 	{
-		board1[0][i] = 1;
-		board1[12][i] = 1;
-		board1[i][0] = -1;
-		board1[i][12] = -1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		for (int i = 0; i < SIZE; i++)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][11] == -1)
-		{
-			dis[i][11]->distance = 0;
-		}
-		else if (board1[i][11] == 0)
-		{
-			dis[i][11]->distance = 1;
-			dis[i][11]->firdistance = 0;
-			dis[i][11]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][11]->distance = inf;
-			dis[i][11]->firdistance = inf;
-			dis[i][11]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
+			if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_val > 0)
 			{
-				dis[i][j]->distance = inf;
+				myboard[i][aim]->blue_dis_to_up = 1;
 			}
 		}
 	}
-	for (int k = 0; k < 3; k++)
+	else
 	{
-		for (int i = 11; i > 0; i--)
+		for (int i = 1; i < SIZE; i++)
 		{
-			for (int j = 11; j > 0; j--)
+			int min = 0;
+			min = mymin(myboard[i][aim + 1]->blue_dis_to_up + myboard[i][aim]->blue_val, myboard[i - 1][aim + 1]->blue_dis_to_up + myboard[i][aim]->blue_val);
+			if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_dis_to_up > min)
 			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
+				myboard[i][aim]->blue_dis_to_up = min;
 			}
 		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
+		if (myboard[0][aim]->blue_val < inf && myboard[0][aim]->blue_dis_to_up > myboard[0][aim + 1]->blue_dis_to_up + myboard[0][aim]->blue_val)
 		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
+			myboard[0][aim]->blue_dis_to_up = myboard[0][aim + 1]->blue_dis_to_up + myboard[0][aim]->blue_val;
 		}
 	}
-	return dis;
+
+	blue_to_up_to_left(aim);
+
+	int back = aim + 1;
+	int isback = blue_twodis_to_up_to_up(back);
+	if (isback == 0)
+		return aim - 1;
+	while (isback != 0)
+	{
+		back++;
+		isback = blue_twodis_to_up_to_up(back);
+	}
+	return back;
 }
 
-xgznode*** mybule_twodis_bule_to_A0() // red = -1    blue = 1
+int blue_to_up_to_left(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	int one = 0;
+	for (int i = 0; i < SIZE; i++)
 	{
-		board1[0][i] = -1;
-		board1[12][i] = -1;
-		board1[i][0] = 1;
-		board1[i][12] = 1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		int lpoint = i - 1, rpoint = i + 1;
+
+		while (lpoint != -1 && myboard[lpoint + 1][aim]->blue_dis_to_up + myboard[lpoint][aim]->blue_val < myboard[lpoint][aim]->blue_dis_to_up)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][1] == -1)
-		{
-			dis[i][1]->distance = 0;
-		}
-		else if (board1[i][1] == 0)
-		{
-			dis[i][1]->distance = 1;
-			dis[i][1]->firdistance = 0;
-			dis[i][1]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][1]->distance = inf;
-			dis[i][1]->firdistance = inf;
-			dis[i][1]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
+			if (myboard[lpoint][aim]->blue_val < inf)
 			{
-				dis[i][j]->distance = inf;
+				myboard[lpoint][aim]->blue_dis_to_up = myboard[lpoint + 1][aim]->blue_dis_to_up + myboard[lpoint][aim]->blue_val;
+				one++;
+				lpoint--;
+			}
+		}
+		while (rpoint != SIZE && myboard[rpoint - 1][aim]->blue_dis_to_up + myboard[rpoint][aim]->blue_val < myboard[rpoint][aim]->blue_dis_to_up)
+		{
+			if (myboard[rpoint][aim]->blue_val < inf)
+			{
+				myboard[rpoint][aim]->blue_dis_to_up = myboard[rpoint - 1][aim]->blue_dis_to_up + myboard[rpoint][aim]->blue_val;
+				one++;
+				rpoint++;
 			}
 		}
 	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
-		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
-		}
-	}
-	return dis;
+	return one;
 }
 
-xgznode*** mybule_twodis_bule_to_A10()  // red = -1    blue = 1
+int blue_twodis_to_up_to_up(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	if (aim >= SIZE - 1)
+		return 0;
+	int ret = 0;
+	for (int i = 0; i < SIZE - 1; i++)
 	{
-		board1[0][i] = -1;
-		board1[12][i] = -1;
-		board1[i][0] = 1;
-		board1[i][12] = 1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		int min = 0;
+		min = mymin(myboard[i][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val, myboard[i + 1][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val);
+		if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_dis_to_down > min)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
+			myboard[i][aim]->blue_dis_to_down = min;
+			ret++;
 		}
 	}
-	for (int i = 1; i <= 11; i++)
+	if (myboard[SIZE - 1][aim]->blue_val < inf && myboard[SIZE - 1][aim]->blue_dis_to_down > myboard[SIZE - 1][aim + 1]->blue_dis_to_down + myboard[SIZE - 1][aim]->blue_val)
 	{
-		if (board1[i][11] == -1)
-		{
-			dis[i][11]->distance = 0;
-		}
-		else if (board1[i][11] == 0)
-		{
-			dis[i][11]->distance = 1;
-			dis[i][11]->firdistance = 0;
-			dis[i][11]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][11]->distance = inf;
-			dis[i][11]->firdistance = inf;
-			dis[i][11]->sedistance = inf;
-		}
+		myboard[SIZE - 1][aim]->blue_dis_to_down = myboard[SIZE - 1][aim - 1]->blue_dis_to_down + myboard[SIZE - 1][aim]->blue_val;
+		ret++;
 	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
-			{
-				dis[i][j]->distance = inf;
-				dis[i][j]->firdistance = inf;
-				dis[i][j]->sedistance = inf;
-			}
-		}
-	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
-		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
-		}
-	}
-	return dis;
+	ret += blue_to_up_to_left(aim);
+	return ret;
 }
 
-xgznode*** mybule_twodis_red_to_A0() // red = -1    blue = 1
+int red_twodis_to_left(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	if (aim == 0)
 	{
-		board1[0][i] = -1;
-		board1[12][i] = -1;
-		board1[i][0] = 1;
-		board1[i][12] = 1;
-	}
-
-	//int firsttime, setime;
-	//firsttime = setime = clock();
-
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		for (int i = 0; i < SIZE; i++)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[1][i] == -1)
-		{
-			dis[1][i] = 0;
-		}
-		else if (board1[1][i] == 0)
-		{
-			dis[1][i]->distance = 1;
-			dis[1][i]->firdistance = 0;
-			dis[1][i]->sedistance = 0;
-		}
-		else
-		{
-			dis[1][i]->distance = inf;
-			dis[1][i]->firdistance = inf;
-			dis[1][i]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
+			if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_val > 0)
 			{
-				dis[i][j]->distance = inf;
-				dis[i][j]->firdistance = inf;
-				dis[i][j]->sedistance = inf;
+				myboard[aim][i]->red_dis_to_left = 1;
+			}
+
+		}
+	}
+	else
+	{
+		for (int i = 0; i < SIZE - 1; i++)
+		{
+			int min = 0;
+			min = mymin(myboard[aim - 1][i]->red_dis_to_left + myboard[aim][i]->red_val, myboard[aim - 1][i + 1]->red_dis_to_left + myboard[aim][i]->red_val);
+			if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_dis_to_left > min)
+			{
+				myboard[aim][i]->red_dis_to_left = min;
 			}
 		}
-	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 1; i <= 11; i++)
+		if (myboard[aim][SIZE - 1]->red_val < inf && myboard[aim][SIZE - 1]->red_dis_to_left > myboard[aim - 1][SIZE - 1]->red_dis_to_left + myboard[aim][SIZE - 1]->red_val)
 		{
-			for (int j = 1; j <= 11; j++)
-			{
-				if (board1[i][j] != 1)
-				{
-					findseconddis(i, j, -1, dis);
-				}
-			}
-		}
-
-		//for (int i = 1; i <= 11; i++)
-		//{
-		//	for (int j = 1; j <= 11; j++)
-		//	{
-		//		cout << dis[i][j]->distance << ' ';
-		//	}
-		//	cout << endl;
-		//}
-		//cout << endl;
-
-
-
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
+			myboard[aim][SIZE - 1]->red_dis_to_left = myboard[aim - 1][SIZE - 1]->red_dis_to_left + myboard[aim][SIZE - 1]->red_val;
 		}
 	}
-	//setime = clock();
-	//cout << setime - firsttime << endl;;
-	return dis;
+
+	red_to_left_to_up(aim);
+
+	int back = aim - 1;
+	int isback = red_twodis_to_left_to_left(back);
+	if (isback == 0)
+		return aim + 1;
+	while (isback != 0)
+	{
+		back--;
+		isback = red_twodis_to_left_to_left(back);
+	}
+	return back;
 }
 
-xgznode*** mybule_twodis_red_to_A10()  // red = -1    blue = 1
+int red_to_left_to_up(int aim)
 {
-	for (int i = 0; i < 13; i++)
+	int one = 0;
+	for (int i = 0; i < SIZE; i++)
 	{
-		board1[0][i] = -1;
-		board1[12][i] = -1;
-		board1[i][0] = 1;
-		board1[i][12] = 1;
-	}
-	xgznode*** dis = new xgznode * *[RealSIZE];
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		dis[i] = new xgznode * [RealSIZE];
-	}
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		for (int j = 0; j < RealSIZE; j++)
+		int dpoint = i - 1, upoint = i + 1;
+
+		while (dpoint != -1 && myboard[aim][dpoint + 1]->red_dis_to_left + myboard[aim][dpoint]->red_val < myboard[aim][dpoint]->red_dis_to_left)
 		{
-			dis[i][j] = new xgznode;
-			dis[i][j]->i = i;
-			dis[i][j]->j = j;
-			dis[i][j]->distance = 128;
-			dis[i][j]->firdistance = 128;
-			dis[i][j]->sedistance = 128;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		if (board1[i][11] == -1)
-		{
-			dis[i][11]->distance = 0;
-		}
-		else if (board1[i][11] == 0)
-		{
-			dis[i][11]->distance = 1;
-			dis[i][11]->firdistance = 0;
-			dis[i][11]->sedistance = 0;
-		}
-		else
-		{
-			dis[i][11]->distance = inf;
-			dis[i][11]->firdistance = inf;
-			dis[i][11]->sedistance = inf;
-		}
-	}
-	for (int i = 1; i <= 11; i++)
-	{
-		for (int j = 1; j <= 11; j++)
-		{
-			if (board1[i][j] == 1)
+			if (myboard[aim][dpoint]->red_val < inf)
 			{
-				dis[i][j]->distance = inf;
-				dis[i][j]->firdistance = inf;
-				dis[i][j]->sedistance = inf;
+				myboard[aim][dpoint]->red_dis_to_left = myboard[aim][dpoint + 1]->red_dis_to_left + myboard[aim][dpoint]->red_val;
+				one++;
+				dpoint--;
+			}
+		}
+		while (upoint != SIZE && myboard[aim][upoint - 1]->red_dis_to_left + myboard[aim][upoint]->red_val < myboard[aim][upoint]->red_dis_to_left)
+		{
+			if (myboard[aim][upoint]->red_val < inf)
+			{
+				myboard[aim][upoint]->red_dis_to_left = myboard[aim][upoint - 1]->red_dis_to_left + myboard[aim][upoint]->red_val;
+				one++;
+				upoint++;
 			}
 		}
 	}
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, dis);
-				}
-			}
-		}
-	}
-	for (int i = 11; i > 0; i--)
-	{
-		for (int j = 11; j > 0; j--)
-		{
-			if (dis[i][j]->distance != 128)
-			{
-				dis[i][j]->distance -= 3;
-			}
-		}
-	}
-	return dis;
+	return one;
 }
 
-void findseconddis(int i, int j, int flag, xgznode*** dis)
+int red_twodis_to_left_to_left(int aim)
 {
+	if (aim < 0)
+		return 0;
+	int ret = 0;
+	if (myboard[aim][0]->red_val < inf && myboard[aim][0]->red_dis_to_left > myboard[aim + 1][0]->red_dis_to_left + myboard[aim][0]->red_val)
+	{
+		myboard[aim][0]->red_dis_to_left = myboard[aim + 1][0]->red_dis_to_left + myboard[aim][0]->red_val;
+		ret++;
+	}
+	for (int i = 1; i < SIZE; i++)
+	{
+		int min = 0;
+		min = mymin(myboard[aim + 1][i - 1]->red_dis_to_left + myboard[aim][i]->red_val, myboard[aim + 1][i]->red_dis_to_left + myboard[aim][i]->red_val);
+		if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_dis_to_left > min)
+		{
+			myboard[aim][i]->red_dis_to_left = min;
+			ret++;
+		}
+	}
+	ret += red_to_left_to_up(aim);
+	return ret;
+}
+
+int red_twodis_to_right(int aim)
+{
+	if (aim == SIZE - 1)
+	{
+		for (int i = 0; i < SIZE; i++)
+		{
+			if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_val > 0)
+			{
+				myboard[aim][i]->red_dis_to_right = 1;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 1; i < SIZE; i++)
+		{
+			int min = 0;
+			min = mymin(myboard[aim + 1][i]->red_dis_to_right + myboard[aim][i]->red_val, myboard[aim + 1][i - 1]->red_dis_to_right + myboard[aim][i]->red_val);
+			if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_dis_to_right > min)
+			{
+				myboard[aim][i]->red_dis_to_right = min;
+			}
+		}
+		if (myboard[aim][0]->red_val < inf && myboard[aim][0]->red_dis_to_right > myboard[aim + 1][0]->red_dis_to_right + myboard[aim][0]->red_val)
+		{
+			myboard[aim][0]->red_dis_to_right = myboard[aim + 1][0]->red_dis_to_right + myboard[aim][0]->red_val;
+		}
+	}
+
+	red_to_right_to_down(aim);
+
+	int back = aim + 1;
+	int isback = red_twodis_to_right_to_right(back);
+	if (isback == 0)
+		return aim - 1;
+	while (isback != 0)
+	{
+		back++;
+		isback = red_twodis_to_right_to_right(back);
+	}
+	return back;
+}
+
+int red_to_right_to_down(int aim)
+{
+	int one = 0;
+	for (int i = 0; i < SIZE; i++)
+	{
+		int dpoint = i - 1, upoint = i + 1;
+
+		while (dpoint != -1 && myboard[aim][dpoint + 1]->red_dis_to_right + myboard[aim][dpoint]->red_val < myboard[aim][dpoint]->red_dis_to_right)
+		{
+			if (myboard[aim][dpoint]->red_val < inf)
+			{
+				myboard[aim][dpoint]->red_dis_to_right = myboard[aim][dpoint + 1]->red_dis_to_left + myboard[aim][dpoint]->red_val;
+				one++;
+				dpoint--;
+			}
+		}
+		while (upoint != SIZE && myboard[aim][upoint - 1]->red_dis_to_right + myboard[aim][upoint]->red_val < myboard[aim][upoint]->red_dis_to_right)
+		{
+			if (myboard[aim][upoint]->red_val < inf)
+			{
+				myboard[aim][upoint]->red_dis_to_right = myboard[aim][upoint - 1]->red_dis_to_right + myboard[aim][upoint]->red_val;
+				one++;
+				upoint++;
+			}
+		}
+	}
+	return one;
+}
+
+int red_twodis_to_right_to_right(int aim)
+{
+	if (aim > SIZE - 1)
+		return 0;
+	int ret = 0;
+	for (int i = 0; i < SIZE - 1; i++)
+	{
+		int min = 0;
+		min = mymin(myboard[aim - 1][i]->red_dis_to_right + myboard[aim][i]->red_val, myboard[aim - 1][i + 1]->red_dis_to_right + myboard[aim][i]->red_val);
+		if (myboard[aim][i]->red_val < inf && myboard[aim][i]->red_dis_to_right > min)
+		{
+			myboard[aim][i]->red_dis_to_right = min;
+			ret++;
+		}
+	}
+	if (myboard[aim][SIZE - 1]->red_val < inf && myboard[aim][SIZE - 1]->red_dis_to_right > myboard[aim - 1][SIZE - 1]->red_dis_to_right + myboard[aim][SIZE - 1]->red_val)
+	{
+		myboard[aim][SIZE - 1]->red_dis_to_right = myboard[aim - 1][SIZE - 1]->red_dis_to_right + myboard[aim][SIZE - 1]->red_val;
+		ret++;
+	}
+	ret += red_to_right_to_down(aim);
+	return ret;
+}
+
+void updata()
+{
+	int aim = 0;
+	while (aim < SIZE)
+	{
+		aim = blue_twodis_to_down(aim);
+	}
+	aim--;
+	while (aim >= 0)
+	{
+		aim = blue_twodis_to_up(aim);
+	}
+	aim++;
+	while (aim < SIZE)
+	{
+		aim = red_twodis_to_left(aim);
+	}
+	aim--;
+	while (aim >= 0)
+	{
+		aim = red_twodis_to_right(aim);
+	}
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			myboard[i][j]->blue_distance = myboard[i][j]->blue_dis_to_down + myboard[i][j]->blue_dis_to_up;
+			myboard[i][j]->red_distance = myboard[i][j]->red_dis_to_left + myboard[i][j]->red_dis_to_right;
+		}
+	}
+}
+
+int get_pot(int color)
+{
+	int bluemin, redmin, bluenum, rednum;
+	bluemin = redmin = inf + inf;
+	bluenum = rednum = 0;
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			if (myboard[i][j]->blue_distance == bluemin)
+			{
+				bluenum++;
+			}
+			else if (myboard[i][j]->blue_distance < bluemin)
+			{
+				bluemin = myboard[i][j]->blue_distance;
+				bluenum = 1;
+			}
+			if (myboard[i][j]->red_distance == redmin)
+			{
+				rednum++;
+			}
+			else if (myboard[i][j]->red_distance < redmin)
+			{
+				redmin = myboard[i][j]->red_distance;
+				rednum = 1;
+			}
+		}
+	}
+	int M = 100;
+	int pot = 0;
+	pot = M * (redmin - bluemin) - (rednum - bluenum);
+	if (color == 1)
+		return pot;
+	else
+		return 50000 - pot;
+}
+
+xgznode** to_get_twodis_best_point()
+{
+
+	//int starttime, nowtime;
+	//starttime = nowtime = clock();
+
+	xgznode_num = 4;
+
+
+	int my = 0; //my = 1  ->   red now
+	if (Current_board[1][2] == 1 && color == 1)
+	{
+		my = 1;
+	}
+	else if (Current_board[1][2] == 1 && color == -1)
+	{
+		my = 0;
+	}
+	else if (Current_board[1][2] == -1 && color == 1)
+	{
+		my = 0;
+	}
+	else
+	{
+		my = 1;
+	}
+
+
+	make_myboard();
+	int** pot = new int* [SIZE];
+	for (int i = 0; i < SIZE; i++)
+	{
+		pot[i] = new int[SIZE];
+		for (int j = 0; j < SIZE; j++)
+		{
+			pot[i][j] = 0;
+		}
+	}
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
+		{
+			if (myboard[i][j]->fill != 1 && my == 1)
+			{
+				int temp_fill = myboard[i][j]->fill;
+				int temp_red_val = myboard[i][j]->red_val;
+				int temp_blue_val = myboard[i][j]->blue_val;
+				int temp_blue_dis_to_down = myboard[i][j]->blue_dis_to_down;
+				int temp_blue_dis_to_up = myboard[i][j]->blue_dis_to_up;
+				int temp_blue_distance = myboard[i][j]->blue_distance;
+				int temp_red_dis_to_left = myboard[i][j]->red_dis_to_left;
+				int temp_red_dis_to_right = myboard[i][j]->red_dis_to_right; 
+				int temp_red_distance = myboard[i][j]->red_distance;
+
+
+				myboard[i][j]->fill = 1;
+				myboard[i][j]->red_val = 0;
+				myboard[i][j]->blue_val = inf;
+				myboard[i][j]->blue_dis_to_down = inf;
+				myboard[i][j]->blue_dis_to_up = inf;
+				myboard[i][j]->blue_distance = inf;
+				updata();
+
+
+				//for (int i = 0; i < SIZE; i++)
+				//{
+				//	for (int j = 0; j < SIZE; j++)
+				//	{
+				//		cout << myboard[i][j]->blue_distance << ' ';
+				//	}
+				//	cout << endl;
+				//}
+				//cout << endl;
+				//cout << endl;
+				//for (int i = 0; i < SIZE; i++)
+				//{
+				//	for (int j = 0; j < SIZE; j++)
+				//	{
+				//		cout << myboard[i][j]->red_distance << ' ';
+				//	}
+				//	cout << endl;
+				//}
+				//cout << endl;
+
+				pot[i][j] = get_pot(my);
+
+
+				//make_myboard();
+
+				myboard[i][j]->fill = temp_fill;
+				myboard[i][j]->red_val = temp_red_val;
+				myboard[i][j]->blue_val = temp_blue_val;
+				myboard[i][j]->blue_dis_to_down = temp_blue_dis_to_down;
+				myboard[i][j]->blue_dis_to_up = temp_blue_dis_to_up;
+				myboard[i][j]->blue_distance = temp_blue_distance;
+				myboard[i][j]->red_dis_to_left = temp_red_dis_to_left;
+				myboard[i][j]->red_dis_to_right = temp_red_dis_to_right;
+				myboard[i][j]->red_distance = temp_red_distance;
+			}
+			else if (myboard[i][j]->fill != 1 && my == 0)
+			{
+				int temp_fill = myboard[i][j]->fill;
+				int temp_red_val = myboard[i][j]->red_val;
+				int temp_blue_val = myboard[i][j]->blue_val;
+				int temp_blue_dis_to_down = myboard[i][j]->blue_dis_to_down;
+				int temp_blue_dis_to_up = myboard[i][j]->blue_dis_to_up;
+				int temp_blue_distance = myboard[i][j]->blue_distance;
+
+				myboard[i][j]->fill = 1;
+				myboard[i][j]->red_val = inf;
+				myboard[i][j]->blue_val = 0;
+				myboard[i][j]->red_dis_to_left = inf;
+				myboard[i][j]->red_dis_to_right = inf;
+				myboard[i][j]->red_distance = inf;
+				updata();
+
+
+				//for (int i = 0; i < SIZE; i++)
+				//{
+				//	for (int j = 0; j < SIZE; j++)
+				//	{
+				//		cout << myboard[i][j]->blue_distance << ' ';
+				//	}
+				//	cout << endl;
+				//}
+				//cout << endl;
+				//cout << endl;
+				//for (int i = 0; i < SIZE; i++)
+				//{
+				//	for (int j = 0; j < SIZE; j++)
+				//	{
+				//		cout << myboard[i][j]->red_distance << ' ';
+				//	}
+				//	cout << endl;
+				//}
+				//cout << endl;
+
+				pot[i][j] = get_pot(my);
+
+
+				//make_myboard();
+
+				myboard[i][j]->fill = temp_fill;
+				myboard[i][j]->red_val = temp_red_val;
+				myboard[i][j]->blue_val = temp_blue_val;
+				myboard[i][j]->blue_dis_to_down = temp_blue_dis_to_down;
+				myboard[i][j]->blue_dis_to_up = temp_blue_dis_to_up;
+				myboard[i][j]->blue_distance = temp_blue_distance;
+			}
+		}
+	}
+	//int max0, max1, max2, max3;
+	//max0 = max1 = max2 = max3 = -100;
 	vector <xgznode*> aim;
-	vector <xgznode*> temp;
-	vector <xgznode*> need_change;
-	xgznode* t1 = new xgznode;
-	t1->i = i;
-	t1->j = j;
-	temp.push_back(t1);
-	int newflag = 1;
-	while (newflag == 1)
+	for (int i = 0; i < 4; i++)
 	{
-		newflag = 0;
-		xgznode* a = temp.back();
-		if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i && aim[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				aim.push_back(dis[a->i][a->j - 1]);
-			}
-		}
-		else if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i && temp[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				temp.push_back(dis[a->i][a->j - 1]);
-				newflag = 1;
-			}
-		}
+		xgznode* temp = new xgznode;
+		temp->fill = 1;
+		temp->i = -1;
+		temp->j = -1;
+		temp->blue_distance = 128;
+		temp->blue_dis_to_down = 128;
+		temp->blue_dis_to_up = 128;
+		temp->red_distance = 128;
+		temp->red_dis_to_left = 128;
+		temp->red_dis_to_right = 128;
+		temp->blue_val = 1;
+		temp->red_val = 1;
+		aim.push_back(temp);
+	}
 
-		if (a->j + 1 < 13 && board1[a->i][a->j + 1] == 0)
+	/*
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
 		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
+			if (myboard[i][j]->fill == 0 && pot[i][j] > max0)
 			{
-				if (aim[i]->i == a->i && aim[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
+				max3 = max2;
+				max2 = max1;
+				max1 = max0;
+				max0 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = aim[1];
+				aim[1] = aim[0];
+				aim[0] = myboard[i][j];
 			}
-			if (s1flag == 0)
+			else if (myboard[i][j]->fill == 0 && pot[i][j] > max1)
 			{
-				aim.push_back(dis[a->i][a->j + 1]);
+				max3 = max2;
+				max2 = max1;
+				max1 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = aim[1];
+				aim[1] = myboard[i][j];
+			}
+			else if (myboard[i][j]->fill == 0 && pot[i][j] > max2)
+			{
+				max3 = max2;
+				max2 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = myboard[i][j];
+			}
+			else if (myboard[i][j]->fill == 0 && pot[i][j] > max3)
+			{
+				max3 = pot[i][j];
+				aim[3] = myboard[i][j];
 			}
 		}
-		else if (a->j + 1 < 13 && board1[a->i][a->j + 1] == flag)
+	}
+	*/
+	int min0, min1, min2, min3;
+	min0 = min1 = min2 = min3 = 1000000;
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < SIZE; j++)
 		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
+			if (myboard[i][j]->fill == 0 && pot[i][j] < min0)
 			{
-				if (temp[i]->i == a->i && temp[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
+				min3 = min2;
+				min2 = min1;
+				min1 = min0;
+				min0 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = aim[1];
+				aim[1] = aim[0];
+				aim[0] = myboard[i][j];
 			}
-			if (s1flag == 0)
+			else if (myboard[i][j]->fill == 0 && pot[i][j] < min1)
 			{
-				temp.push_back(dis[a->i][a->j + 1]);
-				newflag = 1;
+				min3 = min2;
+				min2 = min1;
+				min1 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = aim[1];
+				aim[1] = myboard[i][j];
 			}
-		}
-
-		if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
+			else if (myboard[i][j]->fill == 0 && pot[i][j] < min2)
 			{
-				if (aim[i]->i == a->i - 1 && aim[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
+				min3 = min2;
+				min2 = pot[i][j];
+				aim[3] = aim[2];
+				aim[2] = myboard[i][j];
 			}
-			if (s1flag == 0)
+			else if (myboard[i][j]->fill == 0 && pot[i][j] < min3)
 			{
-				aim.push_back(dis[a->i - 1][a->j]);
-			}
-		}
-		else if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i - 1 && temp[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				temp.push_back(dis[a->i - 1][a->j]);
-				newflag = 1;
-			}
-		}
-
-		if (a->i + 1 < 13 && board1[a->i + 1][a->j] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i + 1 && aim[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				aim.push_back(dis[a->i + 1][a->j]);
-			}
-		}
-		else if (a->i + 1 < 13 && board1[a->i + 1][a->j] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i + 1 && temp[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				temp.push_back(dis[a->i + 1][a->j]);
-				newflag = 1;
-			}
-		}
-
-		if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i + 1 && aim[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				aim.push_back(dis[a->i + 1][a->j - 1]);
-			}
-		}
-		else if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i + 1 && temp[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				temp.push_back(dis[a->i + 1][a->j - 1]);
-				newflag = 1;
-			}
-		}
-
-		if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i - 1 && aim[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				aim.push_back(dis[a->i - 1][a->j + 1]);
-			}
-		}
-		else if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i - 1 && temp[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				temp.push_back(dis[a->i - 1][a->j + 1]);
-				newflag = 1;
+				min3 = pot[i][j];
+				aim[3] = myboard[i][j];
 			}
 		}
 	}
 
-	for (int k = 0; k < (int)aim.size(); k++)
+	int num = 0;
+
+	xgznode** back = new xgznode * [4];
+	for (int i = 0; i < 4; i++)
 	{
-		aim[k]->distance = dis[aim[k]->i][aim[k]->j]->distance;
+		if (myboard[aim[i]->i][aim[i]->j]->fill == 0)
+		{
+			back[i] = new xgznode;
+			back[i]->fill = 0;
+			back[i]->i = aim[i]->i;
+			back[i]->j = aim[i]->j;
+			back[i]->blue_distance = 128;
+			back[i]->blue_dis_to_down = 128;
+			back[i]->blue_dis_to_up = 128;
+			back[i]->red_distance = 128;
+			back[i]->red_dis_to_left = 128;
+			back[i]->red_dis_to_right = 128;
+			back[i]->blue_val = 1;
+			back[i]->red_val = 1;
+		}
+		num++;
+//		cout << back[i]->i << ' ' << back[i]->j << endl;
+
 	}
 
+	xgznode_num = num;
 
-	xgznode* min1 = aim[0];
-	xgznode* min2 = aim[1];
-	if (*min1 > *min2)
-	{
-		min1 = aim[1];
-		min2 = aim[0];
-	}
-	for (int k = 2; k < (int)aim.size(); k++)
-	{
-		if (*min1 > *aim[k])
-		{
-			min2 = min1;
-			min1 = aim[k];
-		}
-		else if (*min2 > *aim[k])
-		{
-			min2 = aim[k];
-		}
-	}
-	while (!aim.empty())
-	{
-		aim.pop_back();
-	}
-	while (!temp.empty())
-	{
-		temp.pop_back();
-	}
-	dis[i][j]->firdistance = min1->distance;
-	dis[i][j]->sedistance = min2->distance;
-	if (dis[i][j]->distance != min2->distance + 1 && min2->distance != 128)
-	{
-		dis[i][j]->distance = min2->distance + 1;
-		need_change.push_back(dis[i][j]);
-	}
-	int wnum = 0;
-	while (/*wnum < 500 &&*/ !need_change.empty())
-	{
-		wnum++;
-		while (!aim.empty())
-		{
-			aim.pop_back();
-		}
-		while (!temp.empty())
-		{
-			temp.pop_back();
-		}
-		temp.push_back(need_change.back());
-		need_change.pop_back();
-		newflag = 1;
-		while (newflag == 1)
-		{
-			newflag = 0;
-			xgznode* a = temp.back();
-			if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i && aim[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i][a->j - 1]);
-				}
-			}
-			else if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i && temp[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i][a->j - 1]);
-					newflag = 1;
-				}
-			}
-
-			if (a->j + 1 < 13 && board1[a->i][a->j + 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i && aim[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i][a->j + 1]);
-				}
-			}
-			else if (a->j + 1 < 13 && board1[a->i][a->j + 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i && temp[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i][a->j + 1]);
-					newflag = 1;
-				}
-			}
-
-			if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i - 1 && aim[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i - 1][a->j]);
-				}
-			}
-			else if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i - 1 && temp[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i - 1][a->j]);
-					newflag = 1;
-				}
-			}
-
-			if (a->i + 1 < 13 && board1[a->i + 1][a->j] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i + 1 && aim[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i + 1][a->j]);
-				}
-			}
-			else if (a->i + 1 < 13 && board1[a->i + 1][a->j] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i + 1 && temp[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i + 1][a->j]);
-					newflag = 1;
-				}
-			}
-
-			if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i + 1 && aim[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i + 1][a->j - 1]);
-				}
-			}
-			else if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i + 1 && temp[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i + 1][a->j - 1]);
-					newflag = 1;
-				}
-			}
-
-			if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i - 1 && aim[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					aim.push_back(dis[a->i - 1][a->j + 1]);
-				}
-			}
-			else if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i - 1 && temp[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					temp.push_back(dis[a->i - 1][a->j + 1]);
-					newflag = 1;
-				}
-			}
-		}
-
-		for (int k = 0; k < (int)aim.size(); k++)
-		{
-			if (dis[aim[k]->i][aim[k]->j]->firdistance > dis[i][j]->distance)
-			{
-				dis[aim[k]->i][aim[k]->j]->sedistance = dis[aim[k]->i][aim[k]->j]->firdistance;
-				dis[aim[k]->i][aim[k]->j]->firdistance = dis[i][j]->distance;
-				dis[aim[k]->i][aim[k]->j]->distance = dis[aim[k]->i][aim[k]->j]->sedistance + 1;
-
-				if (dis[aim[k]->i][aim[k]->j]->distance > 128)
-				{
-					dis[aim[k]->i][aim[k]->j]->distance = 128;
-				}
-				//else
-				//{
-				//	need_change.push_back(aim[k]);
-				//}
-			}
-			else if (dis[aim[k]->i][aim[k]->j]->sedistance > dis[i][j]->distance)
-			{
-				dis[aim[k]->i][aim[k]->j]->sedistance = dis[i][j]->distance;
-				dis[aim[k]->i][aim[k]->j]->distance = dis[aim[k]->i][aim[k]->j]->sedistance + 1;
-
-				if (dis[aim[k]->i][aim[k]->j]->distance > 128)
-				{
-					dis[aim[k]->i][aim[k]->j]->distance = 128;
-				}
-				//else
-				//{
-				//	need_change.push_back(aim[k]);
-				//}
-			}
-		}
-		while (!aim.empty())
-		{
-			aim.pop_back();
-		}
-		while (!temp.empty())
-		{
-			temp.pop_back();
-		}
-	}
-	//for (int i = 0; i < 13; i++)
+	//for (int i = 0; i < SIZE; i++)
 	//{
-	//	for (int j = 0; j < 13; j++)
+	//	for (int j = 0; j < SIZE; j++)
 	//	{
-	//		cout << dis[i][j]->distance << ' ';
+	//		cout << pot[i][j] << ' ';
 	//	}
 	//	cout << endl;
 	//}
-	//cout << endl;
-	return;
-}
 
+	//nowtime = clock();
+	//cout << nowtime - starttime;
 
-//初始化
-void Createdis() {
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		board1[i] = new int[RealSIZE];
-	}
-}
-/*//重置
-void Deletedis() {
-	for (int i = 0; i < RealSIZE; i++)
-	{
-		delete board1[i];
-	}
-}
-*/
-
-xgznode** toget_twodis(int mycolor, int color)
-{
-	xgznode_num = need;
-	make_real();
-	if (mycolor == 1)
-	{
-		xgznode*** now_my_red_twodis_red_one = myred_twodis_red_to_A0();//myred_toget_twodis_red();
-		xgznode*** now_my_red_twodis_red_two = myred_twodis_red_to_A10();
-		xgznode*** now_my_red_twodis_bule_one = myred_twodis_bule_to_A0();
-		xgznode*** now_my_red_twodis_bule_two = myred_twodis_bule_to_A10();
-
-		int** newpot = new int* [13];
-		for (int i = 0; i < 11; i++)
-		{
-			newpot[i] = new int[13];
-		}
-		for (int i = 1; i < 12; i++)
-		{
-			for (int j = 1; j < 12; j++)
-			{
-				if (board[i][j] == 0)
-				{
-					xgznode*** new_my_red_twodis_red_one = get_newtwodis(1, i, j, now_my_red_twodis_red_one);
-					xgznode*** new_my_red_twodis_red_two = get_newtwodis(1, i, j, now_my_red_twodis_red_two);
-					xgznode*** new_my_red_twodis_bule_one = get_newtwodis(1, i, j, now_my_red_twodis_bule_one);
-					xgznode*** new_my_red_twodis_bule_two = get_newtwodis(1, i, j, now_my_red_twodis_bule_two);
-					xgznode*** new_my_red_twodis_red = new xgznode * *[13];
-					for (int n = 0; n < 13; n++)
-					{
-						new_my_red_twodis_red[n] = new xgznode * [13];
-					}
-					for (int n = 1; n < 12; n++)
-					{
-						for (int m = 1; m < 12; m++)
-						{
-							new_my_red_twodis_red[n][m] = new xgznode;
-						}
-					}
-					for (int n = 1; n < 12; n++)
-					{
-						for (int m = 1; m < 12; m++)
-						{
-							new_my_red_twodis_red[n][m]->i = new_my_red_twodis_red_one[n][m]->i;
-							new_my_red_twodis_red[n][m]->i = new_my_red_twodis_red_one[n][m]->i;
-							new_my_red_twodis_red[n][m]->distance = new_my_red_twodis_red_one[n][m]->distance + new_my_red_twodis_red_two[n][m]->distance;
-						}
-					}
-					xgznode*** new_my_red_twodis_bule = new xgznode * *[13];
-					for (int n = 0; n < 13; n++)
-					{
-						new_my_red_twodis_bule[n] = new xgznode * [13];
-					}
-					for (int n = 0; n < 13; n++)
-					{
-						for (int m = 0; m < 13; m++)
-						{
-							new_my_red_twodis_bule[n][m] = new xgznode;
-						}
-					}
-					for (int n = 1; n < 12; n++)
-					{
-						for (int m = 1; m < 12; m++)
-						{
-							new_my_red_twodis_bule[n][m]->i = new_my_red_twodis_bule_one[n][m]->i;
-							new_my_red_twodis_bule[n][m]->i = new_my_red_twodis_bule_one[n][m]->i;
-							new_my_red_twodis_bule[n][m]->distance = new_my_red_twodis_bule_one[n][m]->distance + new_my_red_twodis_bule_two[n][m]->distance;
-						}
-					}
-					newpot[i][j] = getpot(new_my_red_twodis_red, new_my_red_twodis_bule);
-				}
-				else
-				{
-					newpot[i][j] = inf;
-				}
-			}
-		}
-		int min0, min1, min2, min3, min4, min5;
-		int** x_y = new int* [6];
-		for (int i = 0; i < 6; i++)
-		{
-			x_y[i] = new int[2];
-		}
-		x_y[0][0] = 5;
-		x_y[0][1] = 5;
-		x_y[1][0] = 5;
-		x_y[1][1] = 6;
-		x_y[2][0] = 6;
-		x_y[2][1] = 6;
-		x_y[3][0] = 6;
-		x_y[3][1] = 7;
-		x_y[4][0] = 4;
-		x_y[4][1] = 5;
-		x_y[5][0] = 5;
-		x_y[5][1] = 4;
-		min0 = min1 = min2 = min3 = min4 = min5 = inf;
-		for (int i = 0; i < 11; i++)
-		{
-			for (int j = 0; j < 11; j++)
-			{
-				if (min0 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = x_y[2][0];
-					x_y[2][1] = x_y[2][1];
-					min2 = min1;
-					x_y[1][0] = x_y[0][0];
-					x_y[1][1] = x_y[0][1];
-					min1 = min0;
-					x_y[0][0] = i;
-					x_y[0][1] = j;
-					min0 = newpot[i][j];
-				}
-				else if (min1 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = x_y[2][0];
-					x_y[2][1] = x_y[2][1];
-					min2 = min1;
-					x_y[1][0] = i;
-					x_y[1][1] = j;
-					min1 = newpot[i][j];
-				}
-				else if (min2 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = i;
-					x_y[2][1] = j;
-					min2 = newpot[i][j];
-				}
-				else if (min3 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = i;
-					x_y[3][1] = j;
-					min3 = newpot[i][j];
-				}
-				else if (min4 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = i;
-					x_y[4][1] = j;
-					min4 = newpot[i][j];
-				}
-				else if (min5 > newpot[i][j])
-				{
-					x_y[5][0] = i;
-					x_y[5][1] = j;
-					min5 = newpot[i][j];
-				}
-			}
-		}
-		xgznode** aim = new xgznode * [6];
-		for (int i = 0; i < 6; i++)
-		{
-			aim[i] = new xgznode;
-			aim[i]->i = x_y[i][0];
-			aim[i]->j = x_y[i][1];
-		}
-		return aim;
-	}
-	else   //color = 0
-	{
-		xgznode*** now_my_bule_twodis_red_one = mybule_twodis_red_to_A0();//myred_toget_twodis_red();
-		xgznode*** now_my_bule_twodis_red_two = mybule_twodis_red_to_A10();
-		xgznode*** now_my_bule_twodis_bule_one = mybule_twodis_bule_to_A0();
-		xgznode*** now_my_bule_twodis_bule_two = mybule_twodis_bule_to_A10();
-
-		int** newpot = new int* [13];
-		for (int i = 0; i < 13; i++)
-		{
-			newpot[i] = new int[13];
-		}
-
-		for (int i = 0; i < 11; i++)
-		{
-			for (int j = 0; j < 11; j++)
-			{
-				if (board[i][j] == 0)
-				{
-					xgznode*** new_my_bule_twodis_red_one = get_newtwodis(1, i, j, now_my_bule_twodis_red_one);
-					xgznode*** new_my_bule_twodis_red_two = get_newtwodis(1, i, j, now_my_bule_twodis_red_two);
-					xgznode*** new_my_bule_twodis_bule_one = get_newtwodis(1, i, j, now_my_bule_twodis_bule_one);
-					xgznode*** new_my_bule_twodis_bule_two = get_newtwodis(1, i, j, now_my_bule_twodis_bule_two);
-					xgznode*** new_my_bule_twodis_red = new xgznode * *[13];
-					for (int n = 0; n < 13; n++)
-					{
-						new_my_bule_twodis_red[n] = new xgznode * [13];
-					}
-					for (int n = 0; n < 13; n++)
-					{
-						for (int m = 0; m < 13; m++)
-						{
-							new_my_bule_twodis_red[n][m] = new xgznode;
-						}
-					}
-					for (int n = 1; n < 12; n++)
-					{
-						for (int m = 1; m < 12; m++)
-						{
-							new_my_bule_twodis_red[n][m]->i = new_my_bule_twodis_red_one[n][m]->i;
-							new_my_bule_twodis_red[n][m]->i = new_my_bule_twodis_red_one[n][m]->i;
-							new_my_bule_twodis_red[n][m]->distance = new_my_bule_twodis_red_one[n][m]->distance + new_my_bule_twodis_red_two[n][m]->distance;
-
-//							cout << new_my_bule_twodis_red[n][m]->distance << ' ';
-
-						}
-
-//						cout << endl;
-
-					}
-					xgznode*** new_my_bule_twodis_bule = new xgznode * *[13];
-					for (int n = 0; n < 13; n++)
-					{
-						new_my_bule_twodis_bule[n] = new xgznode * [13];
-					}
-					for (int n = 0; n < 13; n++)
-					{
-						for (int m = 0; m < 13; m++)
-						{
-							new_my_bule_twodis_bule[n][m] = new xgznode;
-						}
-					}
-					for (int n = 1; n < 12; n++)
-					{
-						for (int m = 1; m < 12; m++)
-						{
-							new_my_bule_twodis_bule[n][m]->i = new_my_bule_twodis_bule_one[n][m]->i;
-							new_my_bule_twodis_bule[n][m]->i = new_my_bule_twodis_bule_one[n][m]->i;
-							new_my_bule_twodis_bule[n][m]->distance = new_my_bule_twodis_bule_one[n][m]->distance + new_my_bule_twodis_bule_two[n][m]->distance;
-
-//							cout << new_my_bule_twodis_bule[n][m]->distance << ' ';
-
-						}
-
-//						cout << endl;
-
-					}
-					newpot[i][j] = getpot(new_my_bule_twodis_red, new_my_bule_twodis_bule);
-				}
-				else
-				{
-					newpot[i][j] = -inf;
-				}
-			}
-		}
-		for (int i = 0; i < 11; i++)
-		{
-			for (int j = 0; j < 11; j++)
-			{
-				newpot[i][j] = 10000 - newpot[i][j];
-//				cout << newpot[i][j] << ' ';
-			}
-//			cout << endl;
-		}
-		int min0, min1, min2, min3, min4, min5;
-		int** x_y = new int* [6];
-		for (int i = 0; i < 6; i++)
-		{
-			x_y[i] = new int[2];
-		}
-		x_y[0][0] = 5;
-		x_y[0][1] = 5;
-		x_y[1][0] = 5;
-		x_y[1][1] = 6;
-		x_y[2][0] = 6;
-		x_y[2][1] = 6;
-		x_y[3][0] = 6;
-		x_y[3][1] = 7;
-		x_y[4][0] = 4;
-		x_y[4][1] = 5;
-		x_y[5][0] = 5;
-		x_y[5][1] = 4;
-		min0 = min1 = min2 = min3 = min4 = min5 = 10000;
-		for (int i = 0; i < 11; i++)
-		{
-			for (int j = 0; j < 11; j++)
-			{
-				if (min0 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = x_y[2][0];
-					x_y[2][1] = x_y[2][1];
-					min2 = min1;
-					x_y[1][0] = x_y[0][0];
-					x_y[1][1] = x_y[0][1];
-					min1 = min0;
-					x_y[0][0] = i;
-					x_y[0][1] = j;
-					min0 = newpot[i][j];
-				}
-				else if (min1 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = x_y[2][0];
-					x_y[2][1] = x_y[2][1];
-					min2 = min1;
-					x_y[1][0] = i;
-					x_y[1][1] = j;
-					min1 = newpot[i][j];
-				}
-				else if (min2 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = x_y[2][0];
-					x_y[3][1] = x_y[2][1];
-					min3 = min2;
-					x_y[2][0] = i;
-					x_y[2][1] = j;
-					min2 = newpot[i][j];
-				}
-				else if (min3 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = x_y[3][0];
-					x_y[4][1] = x_y[3][1];
-					min4 = min3;
-					x_y[3][0] = i;
-					x_y[3][1] = j;
-					min3 = newpot[i][j];
-				}
-				else if (min4 > newpot[i][j])
-				{
-					x_y[5][0] = x_y[4][0];
-					x_y[5][1] = x_y[4][1];
-					min5 = min4;
-					x_y[4][0] = i;
-					x_y[4][1] = j;
-					min4 = newpot[i][j];
-				}
-				else if (min5 > newpot[i][j])
-				{
-					x_y[5][0] = i;
-					x_y[5][1] = j;
-					min5 = newpot[i][j];
-				}
-			}
-		}
-		xgznode** aim = new xgznode * [6];
-		for (int i = 0; i < 6; i++)
-		{
-			aim[i] = new xgznode;
-			aim[i]->i = x_y[i][0];
-			aim[i]->j = x_y[i][1];
-			//			cout << aim[i]->i << ' ' << aim[i]->j << endl;
-		}
-		return aim;
-	}
-
-}
-
-
-xgznode*** get_newtwodis(int color, int i, int j, xgznode*** dis)
-{
-	xgznode*** newdis = new xgznode * *[13];
-	for (int n = 0; n < 13; n++)
-	{
-		newdis[n] = new xgznode * [13];
-	}
-	for (int n = 0; n < 13; n++)
-	{
-		for (int m = 0; m < 13; m++)
-		{
-			newdis[n][m] = new xgznode;
-		}
-	}
-	for (int n = 0; n < 13; n++)
-	{
-		for (int m = 0; m < 13; m++)
-		{
-			newdis[n][m]->i = dis[n][m]->i;
-			newdis[n][m]->j = dis[n][m]->j;
-			newdis[n][m]->distance = dis[n][m]->distance;
-			newdis[n][m]->firdistance = dis[n][m]->firdistance;
-			newdis[n][m]->sedistance = dis[n][m]->sedistance;
-
-
-//			cout << dis[n][m]->distance << ' ';
-
-
-		}
-
-//		cout << endl;
-
-	}
-
-
-//	cout << endl;
-
-	int flag = color;
-	vector <xgznode*> aim;
-	vector <xgznode*> temp;
-	xgznode* t1 = new xgznode;
-	t1->i = i;
-	t1->j = j;
-	temp.push_back(t1);
-	int newflag = 1;
-	while (newflag == 1)
-	{
-		newflag = 0;
-		xgznode* a = temp.back();
-		if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i && aim[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i;
-				t11->j = a->j - 1;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i && temp[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i;
-				t11->j = a->j - 1;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-		if (a->j + 1 < 13 && board1[a->i][a->j + 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i && aim[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i;
-				t11->j = a->j + 1;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->j + 1 < 13 && board1[a->i][a->j + 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i && temp[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i;
-				t11->j = a->j + 1;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-
-		if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i - 1 && aim[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i - 1;
-				t11->j = a->j;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i - 1 && temp[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i - 1;
-				t11->j = a->j;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-
-		if (a->i + 1 < 13 && board1[a->i + 1][a->j] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i + 1 && aim[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i + 1;
-				t11->j = a->j;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->i + 1 < 13 && board1[a->i + 1][a->j] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i + 1 && temp[i]->j == a->j)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i + 1;
-				t11->j = a->j;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-
-		if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i + 1 && aim[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i + 1;
-				t11->j = a->j - 1;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i + 1 && temp[i]->j == a->j - 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i + 1;
-				t11->j = a->j - 1;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-
-		if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == 0)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)aim.size(); i++)
-			{
-				if (aim[i]->i == a->i - 1 && aim[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i - 1;
-				t11->j = a->j + 1;
-				aim.push_back(t11);
-			}
-		}
-		else if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == flag)
-		{
-			int s1flag = 0;
-			for (int i = 0; i < (int)temp.size(); i++)
-			{
-				if (temp[i]->i == a->i - 1 && temp[i]->j == a->j + 1)
-				{
-					s1flag = 1;
-				}
-			}
-			if (s1flag == 0)
-			{
-				xgznode* t11 = new xgznode;
-				t11->i = a->i - 1;
-				t11->j = a->j + 1;
-				temp.push_back(t11);
-				newflag = 1;
-			}
-		}
-	}
-	vector <xgznode*> need_change;
-	for (int k = 0; k < (int)aim.size(); k++)
-	{
-		if (dis[aim[k]->i][aim[k]->j] > newdis[i][j])
-		{
-			dis[aim[k]->i][aim[k]->j] = newdis[i][j];
-			need_change.push_back(aim[k]);
-		}
-	}
-	while (!aim.empty())
-	{
-		aim.pop_back();
-	}
-	while (!temp.empty())
-	{
-		temp.pop_back();
-	}
-	while (!need_change.empty())
-	{
-		while (!aim.empty())
-		{
-			aim.pop_back();
-		}
-		while (!temp.empty())
-		{
-			temp.pop_back();
-		}
-		temp.push_back(need_change.back());
-		need_change.pop_back();
-		newflag = 1;
-		while (newflag == 1)
-		{
-			newflag = 0;
-			xgznode* a = temp.back();
-			if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i && aim[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i;
-					t11->j = a->j - 1;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->j - 1 >= 0 && board1[a->i][a->j - 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i && temp[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i;
-					t11->j = a->j - 1;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-
-			if (a->j + 1 < 13 && board1[a->i][a->j + 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i && aim[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i;
-					t11->j = a->j + 1;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->j + 1 < 13 && board1[a->i][a->j + 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i && temp[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i;
-					t11->j = a->j + 1;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-
-			if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i - 1 && aim[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i - 1;
-					t11->j = a->j;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->i - 1 >= 0 && board1[a->i - 1][a->j] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i - 1 && temp[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i - 1;
-					t11->j = a->j;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-
-			if (a->i + 1 < 13 && board1[a->i + 1][a->j] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i + 1 && aim[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i + 1;
-					t11->j = a->j;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->i + 1 < 13 && board1[a->i + 1][a->j] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i + 1 && temp[i]->j == a->j)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i + 1;
-					t11->j = a->j;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-
-			if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i + 1 && aim[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i + 1;
-					t11->j = a->j - 1;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->i + 1 < 13 && a->j - 1 >= 0 && board1[a->i + 1][a->j - 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i + 1 && temp[i]->j == a->j - 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i + 1;
-					t11->j = a->j - 1;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-
-			if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == 0)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)aim.size(); i++)
-				{
-					if (aim[i]->i == a->i - 1 && aim[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i - 1;
-					t11->j = a->j + 1;
-					aim.push_back(t11);
-				}
-			}
-			else if (a->i - 1 >= 0 && a->j + 1 < 13 && board1[a->i - 1][a->j + 1] == flag)
-			{
-				int s1flag = 0;
-				for (int i = 0; i < (int)temp.size(); i++)
-				{
-					if (temp[i]->i == a->i - 1 && temp[i]->j == a->j + 1)
-					{
-						s1flag = 1;
-					}
-				}
-				if (s1flag == 0)
-				{
-					xgznode* t11 = new xgznode;
-					t11->i = a->i - 1;
-					t11->j = a->j + 1;
-					temp.push_back(t11);
-					newflag = 1;
-				}
-			}
-		}
-
-		for (int k = 0; k < (int)aim.size(); k++)
-		{
-			if (dis[aim[k]->i][aim[k]->j]->firdistance > newdis[i][j]->distance)
-			{
-				newdis[aim[k]->i][aim[k]->j]->sedistance = newdis[aim[k]->i][aim[k]->j]->firdistance;
-				newdis[aim[k]->i][aim[k]->j]->firdistance = newdis[i][j]->distance;
-				newdis[aim[k]->i][aim[k]->j]->distance = newdis[aim[k]->i][aim[k]->j]->sedistance + 1;
-				need_change.push_back(aim[k]);
-			}
-			else if (dis[aim[k]->i][aim[k]->j]->sedistance > newdis[i][j]->distance)
-			{
-				newdis[aim[k]->i][aim[k]->j]->sedistance = newdis[i][j]->distance;
-				newdis[aim[k]->i][aim[k]->j]->distance = newdis[aim[k]->i][aim[k]->j]->sedistance + 1;
-				need_change.push_back(aim[k]);
-			}
-		}
-		while (!aim.empty())
-		{
-			aim.pop_back();
-		}
-		while (!temp.empty())
-		{
-			temp.pop_back();
-		}
-	}
-
-
-
-	for (int k = 0; k < 3; k++)
-	{
-		for (int i = 11; i > 0; i--)
-		{
-			for (int j = 11; j > 0; j--)
-			{
-				if (board1[i][j] != -1)
-				{
-					findseconddis(i, j, 1, newdis);
-				}
-			}
-		}
-	}
-	//for (int i = 11; i > 0; i--)
-	//{
-	//	for (int j = 11; j > 0; j--)
-	//	{
-	//		if (dis[i][j]->distance != 128)
-	//		{
-	//			dis[i][j]->distance -= 3;
-	//		}
-	//	}
-	//}
-
-
-	return newdis;
-}
-
-
-int getpot(xgznode*** reddis, xgznode*** buledis)// red - bule 
-{
-	for (int i = 0; i < 11; i++)
-	{
-		for (int j = 0; j < 11; j++)
-		{
-			redneedsort.push_back(*reddis[i][j]);
-		}
-	}
-	sort(redneedsort.begin(), redneedsort.end(), greater<xgznode>());
-	for (int i = 0; i < 11; i++)
-	{
-		for (int j = 0; j < 11; j++)
-		{
-			buleneedsort.push_back(*buledis[i][j]);
-		}
-	}
-	sort(buleneedsort.begin(), buleneedsort.end(), greater<xgznode>());
-	int redmin = redneedsort.back().distance;
-	int bulemin = buleneedsort.back().distance;
-	int redend = redneedsort.size() - 1;
-	int buleend = buleneedsort.size() - 1;
-	int redatt = 1;
-	int buleatt = 1;
-	while (1)
-	{
-		if (redneedsort[redend].distance != redmin)
-		{
-			break;
-		}
-		redend--;
-		redatt++;
-	}
-	while (1)
-	{
-		if (buleneedsort[buleend].distance != bulemin)
-		{
-			break;
-		}
-		buleend--;
-		buleatt++;
-	}
-	int M = 10000;
-	int pot = M * (redmin - bulemin) - (redatt - buleatt);
-	while (!redneedsort.empty())
-	{
-		redneedsort.pop_back();
-	}
-	while (!buleneedsort.empty())
-	{
-		buleneedsort.pop_back();
-	}
-	return pot;
+	return back;
 }
 
 

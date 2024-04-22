@@ -2450,7 +2450,7 @@ double MCTNode::UCT()
 MCTNode* MCTNode::expand(MCTNode* node) {
 	//双距离选点
 	int mycolor = who_first();
-	struct xgznode** better_choice = toget_twodis(mycolor, color);
+	struct xgznode** better_choice = to_get_twodis_best_point();
 	MCTNode* new_node = nullptr;
 
 	for (int k = 0; k < xgznode_num; k++) {
@@ -2610,7 +2610,7 @@ int main()
 		printf("1 2");
 		return 0;
 	}
-	Createdis();
+	//Createdis();
 	memcpy(Current_board, iniboard, 121 * sizeof(int));      //复制棋盘
 	//破坏防御函数
 	int end_sign = protect(x, y);

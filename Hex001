@@ -214,6 +214,8 @@ void make_myboard()              //make red = 1;
 
 int blue_twodis_to_down(int aim)
 {
+	if (aim < 0)
+		return 0;
 	if (aim == 0)
 	{
 		for (int i = 0; i < SIZE; i++)
@@ -230,6 +232,9 @@ int blue_twodis_to_down(int aim)
 		for (int i = 0; i < SIZE - 1; i++)
 		{
 			int min = 0;
+			//cout << i + 1 << ' ' << aim - 1 << endl;
+			//cout << myboard[i + 1][aim - 1]->blue_dis_to_down << ' ' << myboard[i][aim]->blue_val << ' ' << endl;
+			//cout << aim << endl;
 			min = mymin(myboard[i][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val, myboard[i + 1][aim - 1]->blue_dis_to_down + myboard[i][aim]->blue_val);
 			if (myboard[i][aim]->blue_val < inf && myboard[i][aim]->blue_dis_to_down > min)
 			{
@@ -311,6 +316,8 @@ int blue_twodis_to_down_to_down(int aim)
 
 int blue_twodis_to_up(int aim)
 {
+	if (aim > SIZE - 1)
+		return SIZE;
 	if (aim == SIZE - 1)
 	{
 		for (int i = 0; i < SIZE; i++)
@@ -407,6 +414,8 @@ int blue_twodis_to_up_to_up(int aim)
 
 int red_twodis_to_left(int aim)
 {
+	if (aim < 0)
+		return 0;
 	if (aim == 0)
 	{
 		for (int i = 0; i < SIZE; i++)
@@ -504,6 +513,8 @@ int red_twodis_to_left_to_left(int aim)
 
 int red_twodis_to_right(int aim)
 {
+	if (aim > SIZE - 1)
+		return SIZE;
 	if (aim == SIZE - 1)
 	{
 		for (int i = 0; i < SIZE; i++)
@@ -719,7 +730,7 @@ xgznode** to_get_twodis_best_point()
 				int temp_blue_dis_to_up = myboard[i][j]->blue_dis_to_up;
 				int temp_blue_distance = myboard[i][j]->blue_distance;
 				int temp_red_dis_to_left = myboard[i][j]->red_dis_to_left;
-				int temp_red_dis_to_right = myboard[i][j]->red_dis_to_right; 
+				int temp_red_dis_to_right = myboard[i][j]->red_dis_to_right;
 				int temp_red_distance = myboard[i][j]->red_distance;
 
 
@@ -941,7 +952,7 @@ xgznode** to_get_twodis_best_point()
 			back[i]->red_val = 1;
 		}
 		num++;
-//		cout << back[i]->i << ' ' << back[i]->j << endl;
+				//cout << back[i]->i << ' ' << back[i]->j << endl;
 
 	}
 

@@ -1016,7 +1016,7 @@ int is_win()				//我方赢了返回1，对方赢了返回-1，未结束返回0
 		if (union_find_father(&Current_boundary[0]) == union_find_father(&Current_boundary[2]))
 			return -1;
 		else if (union_find_father(&Current_boundary[1]) == union_find_father(&Current_boundary[3]))
-			return -1;
+			return 1;
 		else
 			return 0;
 	}

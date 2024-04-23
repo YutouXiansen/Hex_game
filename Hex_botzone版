@@ -2659,7 +2659,7 @@ int main()
 	fill_board();                                         //填充无用位置
 	union_find();     									  //重置用的并查集初始化
 	union_board_reset();
-	if (is_win()) {
+	if (is_win() == 1) {
 		for (int i = 0; i < 11; i++)
 		{
 			for (int j = 0; j < 11; j++)

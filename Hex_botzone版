@@ -956,7 +956,7 @@ xgznode** to_get_twodis_best_point()
 	xgznode** back = new xgznode * [4];
 	for (int i = 0; i < 4; i++)
 	{
-		if (myboard[aim[i]->i][aim[i]->j]->fill == 0)
+		if (aim[i]->i != -1 && myboard[aim[i]->i][aim[i]->j]->fill == 0)
 		{
 			back[i] = new xgznode;
 			back[i]->fill = 0;
@@ -970,8 +970,8 @@ xgznode** to_get_twodis_best_point()
 			back[i]->red_dis_to_right = 128;
 			back[i]->blue_val = 1;
 			back[i]->red_val = 1;
+			num++;
 		}
-		num++;
 		//cout << back[i]->i << ' ' << back[i]->j << endl;
 		
 	}

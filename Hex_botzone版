@@ -2476,7 +2476,7 @@ MCTNode::MCTNode(MCTNode* parent, int x, int y)
 
 double MCTNode::UCT()
 {
-	return 1.414 * sqrt(log(this->parent->search_time) / this->search_time + 0.0001) + 1.0 * this->win_time / this->search_time + 0.01;
+	return 1.414 * sqrt(log(this->parent->search_time) / this->search_time) + 1.0 * this->win_time / this->search_time;
 }
 
 MCTNode* MCTNode::expand(MCTNode* node) {

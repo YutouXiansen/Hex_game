@@ -2144,12 +2144,12 @@ int protect(int x, int y)
 		}
 		if (x == 10)						//侵入高度为2的边界  2种		侵入高度为3的边界  8 种
 		{
-			if (x - 1 >= 10 && y - 1 >= 0 && iniboard[x - 1][y] == 1 && iniboard[x][y - 1] == 0)
+			if (x - 1 >= 0 && y - 1 >= 0 && iniboard[x - 1][y] == 1 && iniboard[x][y - 1] == 0)
 			{
 				printf("%d %d", x, y - 1);
 				return 0;
 			}
-			if (x - 1 >= 10 && y + 1 <= 10 && iniboard[x - 1][y + 1] == 1 && iniboard[x][y + 1] == 0)
+			if (x - 1 >= 0 && y + 1 <= 10 && iniboard[x - 1][y + 1] == 1 && iniboard[x][y + 1] == 0)
 			{
 				printf("%d %d", x, y + 1);
 				return 0;
@@ -2560,8 +2560,10 @@ MCTNode* MCTNode::bestChild(MCTNode* node)
 	{
 		if ((*p)->search_time == 0)
 			return (*p);
-		else if (UCT_number < (*p)->UCT())
+		else if (UCT_number < (*p)->UCT()){
+			UCT_number = (*p)->UCT();
 			best = (*p);
+		}
 	}
 	return best;
 }

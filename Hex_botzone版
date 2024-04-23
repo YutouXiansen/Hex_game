@@ -1322,6 +1322,15 @@ void union_board_reset()
 	{
 		for (int j = 0; j < 11; j++)
 		{
+			Current_union[i][j].father = &Current_union[i][j];
+			Current_union[i][j].x = i;
+			Current_union[i][j].y = j;
+		}
+	}
+	for (int i = 0; i < 11; i++)
+	{
+		for (int j = 0; j < 11; j++)
+		{
 			struct Union_node* vir_father = union_find_father_first(&union_board[i][j]);
 			if (vir_father->x != -1)
 			{

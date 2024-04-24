@@ -1188,21 +1188,13 @@ xgznode** to_get_twodis_best_point()
 
 
 	int my = 0; //my = 1  ->   red now
-	if (Current_board[1][2] == 1 && color == 1)
+	if (Current_board[1][2] == color )
 	{
 		my = 1;
-	}
-	else if (Current_board[1][2] == 1 && color == -1)
-	{
-		my = 0;
-	}
-	else if (Current_board[1][2] == -1 && color == 1)
-	{
-		my = 0;
 	}
 	else
 	{
-		my = 1;
+		my = 0;
 	}
 
 

@@ -1277,18 +1277,30 @@ xgznode** to_get_twodis_best_point()
 		}
 	}
 	*/
-	int min0, min1, min2, min3;
-	min0 = min1 = min2 = min3 = 1000000;
+	int min0, min1, min2, min3, min4, min5, min6, min7, min8, min9;
+	min0 = min1 = min2 = min3 = min4 = min5 = min6 = min7 = min8 = min9 = 1000000;
 	for (int i = 0; i < SIZE; i++)
 	{
 		for (int j = 0; j < SIZE; j++)
 		{
 			if (myboard[i][j].fill == 0 && pot[i][j] < min0)
 			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = min4;
+				min4 = min3;
 				min3 = min2;
 				min2 = min1;
 				min1 = min0;
 				min0 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] = aim[4];
+				aim[4] = aim[3];
 				aim[3] = aim[2];
 				aim[2] = aim[1];
 				aim[1] = aim[0];
@@ -1296,30 +1308,126 @@ xgznode** to_get_twodis_best_point()
 			}
 			else if (myboard[i][j].fill == 0 && pot[i][j] < min1)
 			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = min4;
+				min4 = min3;
 				min3 = min2;
 				min2 = min1;
 				min1 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] = aim[4];
+				aim[4] = aim[3];
 				aim[3] = aim[2];
 				aim[2] = aim[1];
 				aim[1] = myboard[i][j];
 			}
 			else if (myboard[i][j].fill == 0 && pot[i][j] < min2)
 			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = min4;
+				min4 = min3;
 				min3 = min2;
 				min2 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] = aim[4];
+				aim[4] = aim[3];
 				aim[3] = aim[2];
-				aim[2] = myboard[i][j];
+				aim[2] =myboard[i][j];
 			}
 			else if (myboard[i][j].fill == 0 && pot[i][j] < min3)
 			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = min4;
+				min4 = min3;
 				min3 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] = aim[4];
+				aim[4] = aim[3];
 				aim[3] = myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min4)
+			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = min4;
+				min4 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] = aim[4];
+				aim[4] = myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min5)
+			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = min5;
+				min5 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = aim[5];
+				aim[5] =  myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min6)
+			{
+				min9 = min8;
+				min8 = min7;
+				min7 = min6;
+				min6 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = aim[6];
+				aim[6] = myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min7)
+			{
+				min9 = min8;
+				min8 = min7;
+				min7 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = aim[7];
+				aim[7] = myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min8)
+			{
+				min9 = min8;
+				min8 = pot[i][j];
+				aim[9] = aim[8];
+				aim[8] = myboard[i][j];
+			}
+			else if (myboard[i][j].fill == 0 && pot[i][j] < min9)
+			{
+				min9 = pot[i][j];
+				aim[9] = myboard[i][j];
 			}
 		}
 	}
 	int num = 0;
-	xgznode** back = new xgznode * [4];
-	for (int i = 0; i < 4; i++)
+	xgznode** back = new xgznode * [xgznode_num];
+	for (int i = 0; i < xgznode_num; i++)
 	{
 		if (aim[i].i != -1 && myboard[aim[i].i][aim[i].j].fill == 0)
 		{
@@ -1350,8 +1458,7 @@ xgznode** to_get_twodis_best_point()
 	//}
 
 	//nowtime = clock();
-	//cout << nowtime - starttime;
-
+	//cout << nowtime - sttime;
 	return back;
 }
 

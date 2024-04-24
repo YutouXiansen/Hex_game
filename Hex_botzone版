@@ -1042,11 +1042,11 @@ void union_find()			//棋盘并查集初始化
 			{
 				if (i == 0 && Current_board[i][j] == 1)				//对我方，且第一排元素，父节点就是我方边界
 				{
-					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&Current_boundary[0]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[0]);
 				}
 				else if (i == 10 && Current_board[i][j] == 1)			//对我方，且第十一排元素，父节点就是我方边界
 				{
-					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&Current_boundary[2]);
+					union_find_father_first(&union_board[i][j])->father = union_find_father_first(&boundary[2]);
 				}
 				if (Current_board[i][j] == 1)			//对我方，非第一排元素，周围己方落子点都归并一次，归并到该节点
 				{

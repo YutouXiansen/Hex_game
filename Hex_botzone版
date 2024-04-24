@@ -23,7 +23,8 @@ const int SIZE = 11;
 int iniboard[SIZE][SIZE] = { 0 };//本方1，对方-1，空白0
 int board[SIZE][SIZE] = { 0 };
 int Current_board[11][11] = { 0 };			//当前棋局                                     
-int color, round0;
+int color;
+unsigned int round0;
 int visited[11][11] = { 0 };
 int who_first();			//谁先手,先下返回1,后下返回0
 
@@ -2531,9 +2532,10 @@ int MCTNode::simulate() {
 	for (int i = 0; i < 121; i++) {
 		randomnode[i] = i;
 	}
-	
-	srand(unsigned(time(0)));
+
+	srand(round0);
 	random_shuffle(randomnode, randomnode + 121);
+	round0++;
 	
 	for (int i = 0; i < 121; i++) {
 		int x, y;
@@ -2588,7 +2590,8 @@ int who_first() {
 }
 
 MCTNode* MCTNode::monteCarloTreeSearch(int x, int y) {
-	
+
+	round0=0;
 	MCTNode* bestchoice = nullptr;
 	MCTNode* root = new MCTNode(nullptr, x, y);
 	memcpy(board, Current_board, 121 * sizeof(int));        //蒙特卡洛重置用的board初始化

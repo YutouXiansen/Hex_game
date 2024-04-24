@@ -2970,11 +2970,11 @@ int MCTNode::isTerminal() {
 		depth++;
 		ptr = ptr->parent;
 	}
-	if (depth < 3 || xgznode_num == 0){
-		return 0;
+	if (depth >= 3 || xgznode_num == 0){
+		return 1;
 	}
 	else {
-		return 1;
+		return 0;
 	}
 }
 

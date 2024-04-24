@@ -2514,11 +2514,11 @@ MCTNode* MCTNode::select(MCTNode* node)
 			node = node->expand(node);
 			//				return sub_node;
 		}
-		
-		//补充并查集
-		union_find_update(node->x, node->y, color);
 		//补充棋盘
 		Current_board[node->x][node->y] = color;
+		//补充并查集
+		union_find_update(node->x, node->y, color);
+		
 		color = -color;
 		
 	}

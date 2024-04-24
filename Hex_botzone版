@@ -2562,7 +2562,7 @@ void MCTNode::backup(MCTNode* node, int reward) {
 }
 MCTNode* MCTNode::bestChild(MCTNode* node)
 {
-	int UCT_number = 0;
+	double UCT_number = 0;
 	MCTNode* best = NULL;
 	vector<MCTNode*>::iterator p = node->child.begin();
 	for (; p != node->child.end(); p++)

@@ -1249,7 +1249,7 @@ void union_find()			//棋盘并查集初始化
 					if (j - 1 >= 0 && i + 1 <= 10 && Current_board[i + 1][j - 1] == 1)
 					{
 						struct Union_node* p, * q;
-						p = union_find_father_first(&union_board[i][j - 1]);
+						p = union_find_father_first(&union_board[i + 1][j - 1]);
 						q = union_find_father_first(&union_board[i][j]);
 						p->father = q->father;
 					}

@@ -1184,7 +1184,7 @@ int get_pot(int color)
 xgznode** to_get_twodis_best_point()
 {
 
-	xgznode_num = 4;
+	xgznode_num = 10;
 
 
 	int my = 0; //my = 1  ->   red now

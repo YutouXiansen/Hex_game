@@ -1184,9 +1184,6 @@ int get_pot(int color)
 xgznode** to_get_twodis_best_point()
 {
 
-	int starttime, nowtime;
-	starttime = nowtime = clock();
-
 	xgznode_num = 4;
 
 
